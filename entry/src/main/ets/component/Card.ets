@@ -1,3 +1,20 @@
+/**
+ * 图片上文字样式
+ * */
+@Extend(Text) function imgText(){
+  .padding({
+    left:$r('sys.float.ohos_id_textfield_padding_horizontal'),
+    right:$r('sys.float.ohos_id_textfield_padding_horizontal'),
+    top:$r('sys.float.ohos_id_textfield_padding_vertical'),
+    bottom:$r('sys.float.ohos_id_textfield_padding_vertical')
+  })
+  .borderRadius($r('sys.float.corner_radius_level5'))
+  .backgroundColor('rgba(128,128,128,0.5)')
+  .fontColor(Color.White)
+  .fontWeight(FontWeight.Bolder)
+  .fontSize("14fp")
+}
+
 @Preview
 @Component
 export struct Card{
@@ -19,32 +36,23 @@ export struct Card{
               SymbolSpan($r('sys.symbol.heart')).fontColor([Color.Red]).fontWeight(FontWeight.Medium)
               Span(this.fav)
             }.letterSpacing(5)
-            .width("80vp")
-            .height("14vp")
-            .fontSize("14fp")
+            .imgText()
           }
           .width("100%")
-          .height("14vp")
+          // .height("14vp")
           .justifyContent(FlexAlign.SpaceBetween)
           Row() {
             Text(){
               SymbolSpan($r('sys.symbol.clock')).fontWeight(FontWeight.Medium)
               Span(this.duration)
-            }
-              .width("80vp")
-              .height("14vp")
-              .fontSize("14fp")
+            }.imgText()
             Text(){
               SymbolSpan($r('sys.symbol.eye')).fontWeight(FontWeight.Medium)
               Span(this.views).padding({left:$r('sys.float.ohos_id_textfield_padding_horizontal')})
-            }
-            .width("80vp")
-            .height("14vp")
-            .textAlign(TextAlign.End)
-            .fontSize("14fp")
+            }.imgText()
           }
+          // .linearGradient({ colors: [['rgba(0,0,0,0)', 0], ['rgba(0,0,0,0.8)', 1]] })
           .width("100%")
-          .height("14vp")
           .justifyContent(FlexAlign.SpaceBetween)
         }
         .width("100%")
@@ -52,6 +60,8 @@ export struct Card{
         .justifyContent(FlexAlign.SpaceBetween)
         .padding({ top: "20vp", bottom: "20vp", left: "20vp", right: "20vp" })
       }
+      .borderRadius($r('sys.float.ohos_id_card_border_radius'))
+      .shadow({ radius: 4, color: "rgba(0, 0, 30,0.85)" })
       .width("100%")
       .aspectRatio(16/9)
       // .height(200)
@@ -62,7 +72,7 @@ export struct Card{
           .fontSize("16fp")
       }
       .width("100%")
-      .height("30vp")
+      .height("32vp")
     }
 
   }

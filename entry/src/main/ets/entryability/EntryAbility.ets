@@ -14,7 +14,16 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
-
+    window.getLastWindow(this.context, (err, data) => {
+      if (err.code) {
+        console.error('Failed to obtain the top window. Cause: ' + JSON.stringify(err));
+        return;
+      }
+      //不显示状态栏和导航栏
+      data.setWindowSystemBarEnable([])
+      data.setWindowLayoutFullScreen(true)
+      console.info('Succeeded in obtaining the top window. Data: ' + JSON.stringify(data));
+    });
     windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
