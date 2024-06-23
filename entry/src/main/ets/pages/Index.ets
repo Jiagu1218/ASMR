@@ -1,3 +1,4 @@
+import { Card } from '../component/Card';
 import { Article } from '../entity/Article';
 import { LazyDataSource } from '../entity/LazyDataSource';
 import { WebResource } from '../util/WebResoucre';
@@ -35,12 +36,7 @@ struct Index {
       List({}){
         LazyForEach(this.list,(item:Article)=>{
           ListItem(){
-            Row(){
-              Image(item.imgUrl).width('100%')
-              Column(){
-                Text(item.title)
-              }.width('100%')
-            }
+            Card({src:item.imgUrl,fav:item.fav,duration:item.duration,views:item.views,title:item.title})
           }.onClick(async ()=>{
             console.log(item.rjCode,item.pageUrl)
             this.videoController.reset()
@@ -49,11 +45,10 @@ struct Index {
               this.src = this.sources[0]
             }
             this.previewUri = item.imgUrl
-          }).backgroundColor(Color.Yellow)
+          })
         },(item:Article,index)=>index + item.rjCode)
-      }.lanes(2)
+      }.lanes(1)
       .cachedCount(2)
-      .backgroundColor(Color.Gray)
       .height('100%')
       .width('100%')
       .onReachEnd(()=>{
@@ -73,5 +68,11 @@ struct Index {
     }
     .height('100%')
     .width('100%')
+    .padding({
+      top:$r('sys.float.ohos_id_default_padding_top'),
+      left:$r('sys.float.ohos_id_default_padding_start'),
+      right:$r('sys.float.ohos_id_default_padding_end'),
+      bottom:$r('sys.float.ohos_id_default_padding_bottom_flexible'),
+    })
   }
 }
