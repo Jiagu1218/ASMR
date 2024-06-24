@@ -3,6 +3,7 @@ import { Article } from '../entity/Article';
 import { LazyDataSource } from '../entity/LazyDataSource';
 import { WebResource } from '../util/WebResoucre';
 import { SwipeRefresher } from '@ohos.arkui.advanced.SwipeRefresher';
+import { ExpandGroup } from '../component/ExpandGroup';
 
 @Entry
 @Component
@@ -12,6 +13,7 @@ struct Index {
   @State sourcesIndex: number = 0
   @State page: number = 1
   @State src: string = ''
+  @State title: string = ''
   @State previewUri: string = ''
   @State loading: boolean = false
   videoController: VideoController = new VideoController()
@@ -49,11 +51,13 @@ struct Index {
             })
           }.onClick(async () => {
             console.log(item.rjCode, item.pageUrl)
+
             this.videoController.reset()
             this.sources = await WebResource.getSource(item.pageUrl)
             if (this.sources?.length > 0) {
               this.src = this.sources[0]
             }
+            this.title = item.title
             this.previewUri = item.imgUrl
           })
         }, (item: Article, index) => index + item.rjCode)
@@ -72,16 +76,20 @@ struct Index {
       })
 
       if (this.src?.length > 0) {
-        Video({ src: this.src, previewUri: this.previewUri, controller: this.videoController })
-          .onFinish(() => {
-            this.sourcesIndex < this.sources.length ? this.src = this.sources[++this.sourcesIndex] : ''
-          })
-          .onError(() => {
-            console.error("播放出错")
-          })
-          .autoPlay(true)
-          .height('30%')
+        Column(){
+          Video({ src: this.src, previewUri: this.previewUri, controller: this.videoController })
+            .onFinish(() => {
+              this.sourcesIndex < this.sources.length ? this.src = this.sources[++this.sourcesIndex] : ''
+            })
+            .onError(() => {
+              console.error("播放出错")
+            })
+            .autoPlay(true)
+            .height('30%')
+          ExpandGroup({data:{ imageUrl:this.previewUri,groupName:this.title,resources:this.sources}})
+        }
       }
+
     }
     .height('100%')
     .padding({
