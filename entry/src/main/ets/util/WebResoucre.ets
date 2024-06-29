@@ -1,62 +1,70 @@
 import axios, { AxiosError, AxiosResponse } from '@ohos/axios';
 import { DomUtils, parseDocument } from '@ohos/htmlparser2';
-import { Element } from "domhandler"
 import { Article } from '../entity/Article'
+import { taskpool } from '@kit.ArkTS'
+import { hilog } from '@kit.PerformanceAnalysisKit';
 
 export namespace WebResource {
-  export function getListHtmlResource(page: number = 1): Promise<Article[] | null> {
+  export function getListHtmlResource(page: number = 1): Promise<Article[]> {
     return axios.get<string>(`https://www.hentaiasmr.moe/page/${page}`).then((res: AxiosResponse<string>) => {
       if (res.status == 200) {
-        let dom = parseDocument(res.data)
-        let articles = DomUtils.getElementsByTagName('article', dom);
-        return articles.map<Article>((article) => {
-          console.info("article", article)
-          let aTags = DomUtils.getElementsByTagName("a", article, true, 1);
-          if (aTags != null && aTags.length > 0) {
-            let aTag = aTags[0]
-            let att = aTag.attribs
-            //跳转页面链接
-            let pageUrl = att["href"]
-            //标题
-            let title = att["title"]
-            //图片链接
-            let imgUrl = DomUtils.getElementsByTagName("img", aTag, true, 1)[0].attribs["data-src"];
-            //观看数
-            let views = DomUtils.innerText(DomUtils.getElements({ ["class"]: "views" }, aTag, true, 1));
-            //时长
-            let duration = DomUtils.innerText(DomUtils.getElements({ ["class"]: "duration" }, aTag, true, 1))
-            //收藏数
-            let fav =
-              DomUtils.innerText(DomUtils.getChildren(DomUtils.getElements({ ["class"]: "heart-icon" }, aTag, true,
-                1)[0]))
-            //rj编号
-            let rjCode = DomUtils.innerText(DomUtils.getElements({ ["class"]: "rjcodes" }, aTag, true, 1))
-            console.info(title, pageUrl, imgUrl, views, duration, fav, rjCode)
-            return {
-              title,
-              pageUrl,
-              imgUrl,
-              views,
-              duration,
-              fav,
-              rjCode
-            }
-          }
-          return {
-            title: "",
-            pageUrl: "",
-            imgUrl: "",
-            views: "",
-            duration: "",
-            fav: "",
-            rjCode: ""
-          }
+        return taskpool.execute(analysisArticleList,res.data).then(result=>{
+          return result as Array<Article>
         })
       }
-      return null
+      return []
     }).catch((error: AxiosError) => {
       console.error(error.message, error)
-      return null
+      return []
+    })
+  }
+  @Concurrent
+  function analysisArticleList(listHtml:string):Array<Article>{
+    let dom = parseDocument(listHtml)
+    hilog.info(1,'asmrlog','开始analysisArticleList')
+    let articles = DomUtils.getElementsByTagName('article', dom);
+    return articles.map<Article>((article) => {
+      console.info("article", article)
+      let aTags = DomUtils.getElementsByTagName("a", article, true, 1);
+      if (aTags != null && aTags.length > 0) {
+        let aTag = aTags[0]
+        let att = aTag.attribs
+        //跳转页面链接
+        let pageUrl = att["href"]
+        //标题
+        let title = att["title"]
+        //图片链接
+        let imgUrl = DomUtils.getElementsByTagName("img", aTag, true, 1)[0].attribs["data-src"];
+        //观看数
+        let views = DomUtils.innerText(DomUtils.getElements({ ["class"]: "views" }, aTag, true, 1));
+        //时长
+        let duration = DomUtils.innerText(DomUtils.getElements({ ["class"]: "duration" }, aTag, true, 1))
+        //收藏数
+        let fav =
+          DomUtils.innerText(DomUtils.getChildren(DomUtils.getElements({ ["class"]: "heart-icon" }, aTag, true,
+            1)[0]))
+        //rj编号
+        let rjCode = DomUtils.innerText(DomUtils.getElements({ ["class"]: "rjcodes" }, aTag, true, 1))
+        console.info(title, pageUrl, imgUrl, views, duration, fav, rjCode)
+        return {
+          title,
+          pageUrl,
+          imgUrl,
+          views,
+          duration,
+          fav,
+          rjCode
+        }
+      }
+      return {
+        title: "",
+        pageUrl: "",
+        imgUrl: "",
+        views: "",
+        duration: "",
+        fav: "",
+        rjCode: ""
+      }
     })
   }
 
@@ -85,5 +93,24 @@ export namespace WebResource {
       console.error(error.message, error)
       return []
     })
+  }
+
+  @Concurrent
+  function analysisMediaSource(pageHtml:string):string[]{
+    let dom = parseDocument(pageHtml)
+    //多p列表
+    let playList = DomUtils.getElements({ ["class"]: "playlist-item" }, dom,true)
+    if(playList?.length>0){
+      return playList.map<string>(item=>{
+        return item["attribs"]['data-src'] as string
+      })
+    }else {
+      //单p
+      let source = DomUtils.getElementsByTagName('source', dom, true, 1);
+      if (source != null && source.length > 0) {
+        return [source[0].attribs["src"]]
+      }
+      return []
+    }
   }
 }

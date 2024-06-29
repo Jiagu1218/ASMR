@@ -4,6 +4,9 @@ import { LazyDataSource } from '../entity/LazyDataSource';
 import { WebResource } from '../util/WebResoucre';
 import { SwipeRefresher } from '@ohos.arkui.advanced.SwipeRefresher';
 import { ExpandGroup } from '../component/ExpandGroup';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import dataSourcePool from '../pool/DataSourcePool';
+import { emitter } from '@kit.BasicServicesKit';
 
 @Entry
 @Component
@@ -34,7 +37,18 @@ struct Index {
   }
 
   aboutToAppear(): void {
-    this.getListData()
+    // this.getListData()
+    emitter.once("dataSourcePool_init",()=>{
+      setTimeout(()=>{
+        this.getData()
+      },100)
+    })
+  }
+  getData(){
+    let data:Article[]
+      data = dataSourcePool.getData(10)
+    this.list.push(...data)
+    hilog.info(1,'asmrlog','页面aboutToAppear '+data.length)
   }
 
   build() {
@@ -72,7 +86,7 @@ struct Index {
       .height('100%')
       .width('100%')
       .onReachEnd(() => {
-        this.getListData()
+        this.list.push(...dataSourcePool.getData(10))
       })
 
       if (this.src?.length > 0) {
