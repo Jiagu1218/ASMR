@@ -44,9 +44,9 @@ struct Index {
       },100)
     })
   }
-  getData(){
+  async getData(){
     let data:Article[]
-      data = dataSourcePool.getData(10)
+      data = await dataSourcePool.getData(10)
     this.list.push(...data)
     hilog.info(1,'asmrlog','页面aboutToAppear '+data.length)
   }
@@ -85,8 +85,9 @@ struct Index {
       .cachedCount(2)
       .height('100%')
       .width('100%')
-      .onReachEnd(() => {
-        this.list.push(...dataSourcePool.getData(10))
+      .onReachEnd(async () => {
+        const data = await dataSourcePool.getData(10)
+        this.list.push(...data)
       })
 
       if (this.src?.length > 0) {
