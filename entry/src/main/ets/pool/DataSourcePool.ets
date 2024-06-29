@@ -2,8 +2,8 @@ import { Article } from '../entity/Article'
 import { Queue } from '@kit.ArkTS';
 import { ArkTSUtils } from '@kit.ArkTS'
 import { WebResource } from '../util/WebResoucre';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import emitter from '@ohos.events.emitter';
+import { LogUtil } from '../util/LogUtil';
 
 class DataSourcePool {
   private pageNum: number = 1;
@@ -13,7 +13,7 @@ class DataSourcePool {
 
   async getData(size: number = 5): Promise<Article[]> {
     const result: Article[] = [];
-    hilog.info(1, 'asmrlog', 'DataSourcePool getData length length ' + this.webDataSources.length);
+    LogUtil.info('DataSourcePool getData length length ' + this.webDataSources.length);
     for (let i = 0; i < size; i++) {
       if (this.webDataSources.length <= 0) {
         break;
@@ -27,7 +27,7 @@ class DataSourcePool {
   }
 
   private async addData(...articles: Article[]): Promise<void> {
-    hilog.info(1, 'asmrlog', 'DataSourcePool addData length ' + articles.length);
+    LogUtil.info('DataSourcePool addData length ' + articles.length);
     await this.lock.lockAsync(async () => {
       articles.forEach(item => this.webDataSources.add(item));
     });

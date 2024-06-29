@@ -7,25 +7,45 @@ import { ExpandGroup } from '../component/ExpandGroup';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import dataSourcePool from '../pool/DataSourcePool';
 import { emitter } from '@kit.BasicServicesKit';
+import { LogUtil } from '../util/LogUtil';
 
 @Entry
 @Component
 struct Index {
+  /**
+   * 列表数据
+   * */
   @State list: LazyDataSource<Article> = new LazyDataSource()
+  /**
+   * 播放列表数据
+   * */
   @State @Watch('sourcesChange') sources: string[] = []
+  /**
+   * 播放数据位置
+   * */
   @State sourcesIndex: number = 0
-  @State page: number = 1
+  // @State page: number = 1
+  /**
+   * 播放源信息
+   * */
   @State src: string = ''
   @State title: string = ''
   @State previewUri: string = ''
+
+  /**
+   * 列表是否加载中
+   * */
   @State loading: boolean = false
+  /**
+   * 视频控制器
+   * */
   videoController: VideoController = new VideoController()
 
   sourcesChange() {
     this.sourcesIndex = 0
   }
 
-  async getListData() {
+/*  async getListData() {
     this.loading = true
     let list = await WebResource.getListHtmlResource(this.page)
 
@@ -34,20 +54,25 @@ struct Index {
       this.list.push(...list)
     }
     this.loading = false
-  }
+  }*/
 
   aboutToAppear(): void {
-    // this.getListData()
+    this.loading = true
     emitter.once("dataSourcePool_init",()=>{
       setTimeout(()=>{
         this.getData()
       },100)
     })
   }
+
+  /**
+   * 从数据池中获取数据
+   * */
   async getData(){
-    let data:Article[]
-      data = await dataSourcePool.getData(10)
+    this.loading = true
+    let data:Article[] = await dataSourcePool.getData(10)
     this.list.push(...data)
+    this.loading = false
     hilog.info(1,'asmrlog','页面aboutToAppear '+data.length)
   }
 
@@ -64,8 +89,7 @@ struct Index {
               title: item.title
             })
           }.onClick(async () => {
-            console.log(item.rjCode, item.pageUrl)
-
+            LogUtil.info(item.rjCode, item.pageUrl)
             this.videoController.reset()
             this.sources = await WebResource.getSource(item.pageUrl)
             if (this.sources?.length > 0) {
@@ -85,9 +109,8 @@ struct Index {
       .cachedCount(2)
       .height('100%')
       .width('100%')
-      .onReachEnd(async () => {
-        const data = await dataSourcePool.getData(10)
-        this.list.push(...data)
+      .onReachEnd(() => {
+        this.getData()
       })
 
       if (this.src?.length > 0) {
@@ -97,7 +120,7 @@ struct Index {
               this.sourcesIndex < this.sources.length ? this.src = this.sources[++this.sourcesIndex] : ''
             })
             .onError(() => {
-              console.error("播放出错")
+              LogUtil.error("播放出错")
             })
             .autoPlay(true)
             .height('30%')
