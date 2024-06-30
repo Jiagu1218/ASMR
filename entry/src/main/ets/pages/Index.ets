@@ -1,7 +1,7 @@
 import { Card } from '../component/Card';
 import { Article } from '../entity/Article';
 import { LazyDataSource } from '../entity/LazyDataSource';
-import { WebResource } from '../util/WebResoucre';
+import { WebResource } from '../net/WebResoucre';
 import { SwipeRefresher } from '@ohos.arkui.advanced.SwipeRefresher';
 import { ExpandGroup } from '../component/ExpandGroup';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -57,6 +57,7 @@ struct Index {
   }*/
 
   aboutToAppear(): void {
+    WebResource.getWorks()
     this.loading = true
     emitter.once("dataSourcePool_init",()=>{
       setTimeout(()=>{

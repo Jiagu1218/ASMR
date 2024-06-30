@@ -1,7 +1,7 @@
 import { Article } from '../entity/Article'
 import { Queue } from '@kit.ArkTS';
 import { ArkTSUtils } from '@kit.ArkTS'
-import { WebResource } from '../util/WebResoucre';
+import { WebResource } from '../net/WebResoucre';
 import emitter from '@ohos.events.emitter';
 import { LogUtil } from '../util/LogUtil';
 

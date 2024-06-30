@@ -1,10 +1,13 @@
-import axios, { AxiosError, AxiosResponse } from '@ohos/axios';
+import axios, { AxiosResponse } from '@ohos/axios';
 import { DomUtils, parseDocument } from '@ohos/htmlparser2';
-import { Article } from '../entity/Article'
-import { taskpool } from '@kit.ArkTS'
-import { LogUtil } from './LogUtil';
+import { Article } from '../entity/Article';
+import { taskpool } from '@kit.ArkTS';
+import { LogUtil } from '../util/LogUtil';
+import { Works } from './Works';
+import { WorkTrack } from './WorkTrack';
 
 export namespace WebResource {
+
   export function getListHtmlResource(page: number = 1): Promise<Article[]> {
     return axios.get<string>(`https://www.hentaiasmr.moe/page/${page}`).then((res: AxiosResponse<string>) => {
       if (res.status == 200) {
@@ -15,6 +18,7 @@ export namespace WebResource {
       return []
     })
   }
+
   @Concurrent
   function analysisArticleList(listHtml:string):Array<Article>{
     let dom = parseDocument(listHtml)
@@ -89,5 +93,28 @@ export namespace WebResource {
       }
       return []
     }
+  }
+
+  export function getWorks(page: number = 1,order:string='create_date',sort: 'asc'|'desc' = 'desc'){
+    axios.get<Works>(`https://api.asmr-200.com/api/works`,{
+      params:{ page, order, sort }
+    }).then((res: AxiosResponse<Works>) => {
+      if (res.status == 200) {
+        console.info('Works', res.data)
+        const work = res.data.works[0]
+        getWorkTracks(work.source_id)
+      }
+    })
+  }
+
+  export function getWorkTracks(rjCode:string){
+    const code = rjCode.replace('RJ0','').replace('rj0','')
+    axios.get<WorkTrack[]>(`https://api.asmr-200.com/api/tracks/${code}`,{
+      params:{ v:1 }
+    }).then((res: AxiosResponse<WorkTrack[]>) => {
+      if (res.status == 200) {
+        console.info('tracks', res.data)
+      }
+    })
   }
 }
