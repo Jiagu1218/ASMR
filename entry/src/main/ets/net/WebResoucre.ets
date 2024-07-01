@@ -4,7 +4,7 @@ import { Article } from '../entity/Article';
 import { taskpool } from '@kit.ArkTS';
 import { LogUtil } from '../util/LogUtil';
 import { Works } from './Works';
-import { WorkTrack } from './WorkTrack';
+import { WorkTracks } from './WorkTrack';
 
 export namespace WebResource {
 
@@ -95,26 +95,26 @@ export namespace WebResource {
     }
   }
 
-  export function getWorks(page: number = 1,order:string='create_date',sort: 'asc'|'desc' = 'desc'){
-    axios.get<Works>(`https://api.asmr-200.com/api/works`,{
+  export function getWorks(page: number = 1,order:string='create_date',sort: 'asc'|'desc' = 'desc'):Promise<Works>{
+    return axios.get<Works>(`https://api.asmr-200.com/api/works`,{
       params:{ page, order, sort }
     }).then((res: AxiosResponse<Works>) => {
       if (res.status == 200) {
-        console.info('Works', res.data)
-        const work = res.data.works[0]
-        getWorkTracks(work.source_id)
+        return res.data
       }
+      return {}
     })
   }
 
-  export function getWorkTracks(rjCode:string){
+  export function getWorkTracks(rjCode:string):Promise<WorkTracks>{
     const code = rjCode.replace('RJ0','').replace('rj0','')
-    axios.get<WorkTrack[]>(`https://api.asmr-200.com/api/tracks/${code}`,{
+    return axios.get<WorkTracks>(`https://api.asmr-200.com/api/tracks/${code}`,{
       params:{ v:1 }
-    }).then((res: AxiosResponse<WorkTrack[]>) => {
+    }).then((res: AxiosResponse<WorkTracks>) => {
       if (res.status == 200) {
-        console.info('tracks', res.data)
+        return res.data
       }
+      return []
     })
   }
 }

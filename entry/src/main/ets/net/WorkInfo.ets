@@ -98,7 +98,7 @@ export interface WorkInfo {
   /**
    * 用户评分
    * */
-  userRating: number
+  userRating?: number
   /**
    * 社团
    * */

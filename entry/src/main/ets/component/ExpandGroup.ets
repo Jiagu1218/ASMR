@@ -29,12 +29,18 @@ export struct ExpandGroup {
         bottom:$r('sys.float.ohos_id_piece_padding_vertical')
       })
       if (this.expand){
-        ForEach(this.data.resources,(item:string)=>{
-          Row(){
-            Text(item.substring(item.lastIndexOf('/')+1)).maxLines(1)
-          }.padding({left:24})
-          .height(48)
-        },(item:string)=>item)
+        List({space:24}){
+          ForEach(this.data.resources,(item:string)=>{
+            ListItem(){
+              SymbolGlyph($r('sys.symbol.music')).backgroundColor(Color.Orange).fontColor([Color.White])
+                .fontSize(48).borderRadius($r('sys.float.ohos_id_corner_radius_icon'))
+                .onClick(()=>{
+                  console.info('音源:'+item)
+                })
+            }
+          },(item:string)=>item)
+        }.listDirection(Axis.Horizontal)
+        .height(48)
       }
     }.width('100%')
     .borderRadius($r('sys.float.ohos_id_corner_radius_card'))

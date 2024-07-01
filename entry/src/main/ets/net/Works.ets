@@ -3,8 +3,8 @@ import { WorkInfo } from './WorkInfo'
  * 作品信息列表（ ASMR300）
  * */
 export interface Works {
-  works: WorkInfo[]
-  pagination: Pagination
+  works?: WorkInfo[]
+  pagination?: Pagination
 }
 
 

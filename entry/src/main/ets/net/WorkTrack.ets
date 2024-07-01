@@ -1,3 +1,7 @@
+
+export interface WorkTracks extends Array<WorkTrack>{
+
+}
 /**
  * 作品文件信息（ ASMR300）
  * */
@@ -13,7 +17,7 @@ export interface WorkTrack {
   /**
    *
    * */
-  children?: WorkTrack[]
+  children?: WorkTracks
   /**
    * 格式为:id/文件id?
    * */

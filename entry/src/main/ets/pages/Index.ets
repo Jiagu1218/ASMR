@@ -8,6 +8,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import dataSourcePool from '../pool/DataSourcePool';
 import { emitter } from '@kit.BasicServicesKit';
 import { LogUtil } from '../util/LogUtil';
+import { router } from '@kit.ArkUI';
 
 @Entry
 @Component
@@ -126,6 +127,11 @@ struct Index {
             .autoPlay(true)
             .height('30%')
           ExpandGroup({data:{ imageUrl:this.previewUri,groupName:this.title,resources:this.sources}})
+          Row(){
+            Text('跳转').onClick(()=>{
+              router.pushUrl({url:'pages/AsmrWork'})
+            })
+          }
         }
       }
 
