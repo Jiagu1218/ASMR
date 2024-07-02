@@ -9,6 +9,8 @@ import dataSourcePool from '../pool/DataSourcePool';
 import { emitter } from '@kit.BasicServicesKit';
 import { LogUtil } from '../util/LogUtil';
 import { router } from '@kit.ArkUI';
+import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
+import { Want } from '@kit.AbilityKit';
 
 @Entry
 @Component
