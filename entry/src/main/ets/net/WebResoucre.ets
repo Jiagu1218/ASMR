@@ -107,7 +107,7 @@ export namespace WebResource {
   }
 
   export function getWorkTracks(rjCode:string):Promise<WorkTracks>{
-    const code = rjCode.replace('RJ0','').replace('rj0','')
+    const code = rjCode.replace('RJ0','').replace('rj0','').replace('RJ','').replace('rj','')
     return axios.get<WorkTracks>(`https://api.asmr-200.com/api/tracks/${code}`,{
       params:{ v:1 }
     }).then((res: AxiosResponse<WorkTracks>) => {

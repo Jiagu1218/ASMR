@@ -1,10 +1,11 @@
+import { Tag, WorkInfo } from '../net/WorkInfo'
+import { LengthMetrics } from '@ohos.arkui.node'
+import { WebResource } from '../net/WebResoucre'
+import { TestDialog } from './TestDialog'
+
 /**
  * 图片上文字样式
  * */
-import { Tag, WorkInfo } from '../net/WorkInfo'
-import { LengthMetric, LengthMetrics } from '@ohos.arkui.node'
-import { WebResource } from '../net/WebResoucre'
-
 @Extend(Text) function imgText(){
   .padding({
     left:$r('sys.float.ohos_id_textfield_padding_horizontal'),
@@ -22,6 +23,10 @@ import { WebResource } from '../net/WebResoucre'
 @Preview
 @Component
 export struct WorkCard{
+
+  dialogController: CustomDialogController = new CustomDialogController({
+    builder: TestDialog(),
+  })
 
   @Require @Prop work:WorkInfo = {
     "id": 1204312,
@@ -301,7 +306,6 @@ export struct WorkCard{
       .shadow({ radius: 4, color: "rgba(0, 0, 30,0.85)" })
       .width("100%")
       .aspectRatio(16/9)
-      // .height(200)
       Row() {
         Text(this.work.title)
           .width("100%")
@@ -355,6 +359,10 @@ export struct WorkCard{
     }.onClick(()=>{
       WebResource.getWorkTracks(this.work.source_id).then(result=>{
         console.info('workFiles信息：',JSON.stringify(result))
+        this.dialogController = new CustomDialogController({
+          builder: TestDialog({showList:result}),
+        })
+        this.dialogController.open()
       })
     })
 
