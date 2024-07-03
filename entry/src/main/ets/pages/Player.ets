@@ -1,6 +1,7 @@
 import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
-import { mediaquery } from '@kit.ArkUI';
+import { mediaquery, router } from '@kit.ArkUI';
+import { WorkInfo } from '../net/WorkInfo';
 
 @Preview
 @Entry
@@ -18,6 +19,11 @@ struct Player {
   @State mdContainer:boolean = false
   @State lgContainer:boolean = false
   aboutToAppear(): void {
+    const work = (router.getParams() as WorkInfo)
+    this.title = work.title
+    this.author = work.name
+    this.duration = work.duration
+    this.artImage = work.mainCoverUrl
     this.smListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
     this.lgListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.lgLine(mediaQueryResult)})
@@ -133,7 +139,7 @@ struct Player {
 
   @Builder artArea() {
     Column(){
-      Image(this.artImage).height(320).width(320).aspectRatio(1).objectFit(ImageFit.Cover)
+      Image(this.artImage).height(240).width(240).aspectRatio(1).objectFit(ImageFit.Cover)
     }.width('100%')
     .justifyContent(FlexAlign.Center)
     .height(400)

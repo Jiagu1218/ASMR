@@ -7,6 +7,7 @@ import { display, mediaquery } from '@kit.ArkUI'
 @Entry
 @Component
 struct AsmrWork {
+  pageNum:number = 1
   @State useWaterFlows:boolean = true
   displayWidth:number = 720
   @State waterFlowColumnsTemplate:string = '1fr '
@@ -52,8 +53,13 @@ struct AsmrWork {
     this.threeListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.threeLine(mediaQueryResult) })
     this.displayWidth = px2vp(display.getDefaultDisplaySync().width)
     // this.getWaterFlowColumnsTemplate(this.displayWidth)
-    WebResource.getWorks().then(works=>{
+    this.getWorks()
+  }
+
+  getWorks():void{
+    WebResource.getWorks(this.pageNum).then(works=>{
       if (works.works) {
+        this.pageNum++
         const more = works.works as WorkInfo[]
         this.list.push(...more)
       }
@@ -81,6 +87,10 @@ struct AsmrWork {
         .rowsGap(8)
         .height('100%')
         .width('100%')
+        .cachedCount(3)
+        .onReachEnd(()=>{
+          this.getWorks()
+        })
       }else {
         List({space:24}){
           LazyForEach(this.list,(work:WorkInfo)=>{

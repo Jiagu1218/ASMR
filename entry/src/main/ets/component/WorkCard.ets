@@ -2,6 +2,7 @@ import { Tag, WorkInfo } from '../net/WorkInfo'
 import { LengthMetrics } from '@ohos.arkui.node'
 import { WebResource } from '../net/WebResoucre'
 import { TestDialog } from './TestDialog'
+import { router } from '@kit.ArkUI'
 
 /**
  * 图片上文字样式
@@ -348,21 +349,22 @@ export struct WorkCard{
         }
       }.width("100%")
       Flex({space:{main:LengthMetrics.vp(16),cross:LengthMetrics.vp(8)},wrap:FlexWrap.Wrap}){
-        ForEach(this.work.tags,(tag:Tag,index)=>{
-          Text(tag.name).fontColor(Color.White).backgroundColor(Color.Gray)
+        Repeat<Tag>(this.work.tags).each(tag =>{
+          Text(tag.item.name).fontColor(Color.White).backgroundColor(Color.Gray)
             .borderRadius($r('sys.float.corner_radius_level8')).padding(8)
             .onClick(()=>{
-              console.info('标签',tag.name)
+              console.info('标签',tag.item.name)
             })
-        },(tag:Tag)=>tag.id.toString())
+        }).key(item=>item.id.toString())
       }.width('100%')
     }.onClick(()=>{
       WebResource.getWorkTracks(this.work.source_id).then(result=>{
         console.info('workFiles信息：',JSON.stringify(result))
-        this.dialogController = new CustomDialogController({
-          builder: TestDialog({showList:result}),
-        })
-        this.dialogController.open()
+        router.pushUrl({url:'pages/Player',params:this.work})
+        // this.dialogController = new CustomDialogController({
+        //   builder: TestDialog({showList:result}),
+        // })
+        // this.dialogController.open()
       })
     })
 
