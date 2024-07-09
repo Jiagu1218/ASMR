@@ -1,16 +1,15 @@
 import { hilog } from '@kit.PerformanceAnalysisKit'
 export namespace LogUtil{
-  type Unknown = object|string|number
-  export function info(format: string, ...args: Unknown[]){
+  export function info(format: string, ...args: ESObject[]){
     hilog.info(1,'ASMR_log',format,args)
   }
-  export function error(format: string, ...args: object[]){
+  export function error(format: string, ...args: ESObject[]){
     hilog.error(1,'ASMR_log',format,args)
   }
-  export function debug(format: string, ...args: object[]){
+  export function debug(format: string, ...args: ESObject[]){
     hilog.debug(1,'ASMR_log',format,args)
   }
-  export function warn(format: string, ...args: object[]){
+  export function warn(format: string, ...args: ESObject[]){
     hilog.warn(1,'ASMR_log',format,args)
   }
 }
