@@ -1,8 +1,6 @@
 import { Tag, WorkInfo } from '../net/WorkInfo'
 import { LengthMetrics } from '@ohos.arkui.node'
-import { WebResource } from '../net/WebResoucre'
 import { TestDialog } from './TestDialog'
-import { router } from '@kit.ArkUI'
 
 /**
  * 图片上文字样式

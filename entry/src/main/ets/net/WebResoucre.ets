@@ -5,6 +5,7 @@ import { taskpool } from '@kit.ArkTS';
 import { LogUtil } from '../util/LogUtil';
 import { Works } from './Works';
 import { WorkTracks } from './WorkTrack';
+import { parseVttFileStr } from '../util/VttUtil';
 
 export namespace WebResource {
 
@@ -128,6 +129,17 @@ export namespace WebResource {
       }
     }).catch((e:AxiosError)=>{
       console.error('getJmComic',e)
+    })
+  }
+
+  export async function getVtt(){
+    axios.get<string>('https://api.asmr-200.com/api/media/stream/1203410/1093366').then((res:AxiosResponse<string>)=>{
+      if (res.status == 200) {
+        console.info('getJmComic',res.data)
+        parseVttFileStr(res.data)
+      }
+    }).catch((e:AxiosError)=>{
+      console.error('getVtt',e)
     })
   }
 }
