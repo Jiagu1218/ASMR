@@ -11,6 +11,7 @@ import { LogUtil } from '../util/LogUtil';
 import { router } from '@kit.ArkUI';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { Want } from '@kit.AbilityKit';
+import { DATA_SOURCE_POOL_INIT_FINISH } from '../constant/AppStorageConstant';
 
 @Entry
 @Component
@@ -62,7 +63,7 @@ struct Index {
   aboutToAppear(): void {
     WebResource.getJmComic()
     this.loading = true
-    emitter.once("dataSourcePool_init",()=>{
+    emitter.once(DATA_SOURCE_POOL_INIT_FINISH,()=>{
       setTimeout(()=>{
         this.getData()
       },100)

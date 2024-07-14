@@ -2,12 +2,16 @@ import { WorkCard } from '../component/WorkCard'
 import { LazyDataSource } from '../entity/LazyDataSource'
 import { WebResource } from '../net/WebResoucre'
 import { WorkInfo } from '../net/WorkInfo'
-import { display, mediaquery } from '@kit.ArkUI'
+import { display, mediaquery, router } from '@kit.ArkUI'
+import { MEDIA_SERVICE } from '../constant/AppStorageConstant'
+import { MediaService } from '../service/MediaService'
+import { LogUtil } from '../util/LogUtil'
 
 @Entry
 @Component
 struct AsmrWork {
   pageNum:number = 1
+  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
   @State useWaterFlows:boolean = true
   displayWidth:number = 720
   @State waterFlowColumnsTemplate:string = '1fr '
@@ -43,6 +47,7 @@ struct AsmrWork {
       return
     }
   }
+
   /**
    * 列表数据
    * */
@@ -79,7 +84,18 @@ struct AsmrWork {
         WaterFlow(){
           LazyForEach(this.list,(work:WorkInfo)=>{
             FlowItem(){
-              WorkCard({work:work})
+              WorkCard({work:work}).onClick(()=>{
+                LogUtil.info('Work card',work.source_id)
+                this.mediaService.playMedia({
+                  id:work.source_id,
+                  title:work.title,
+                  duration:work.duration,
+                  imageUrl:work.mainCoverUrl,
+                  mediaUrl:'',
+                  singer:work.name
+                })
+                router.pushUrl({url:'pages/Player'})
+              })
             }.width('100%')
           },(work:WorkInfo)=>work.id.toString())
         }.columnsTemplate(this.waterFlowColumnsTemplate)

@@ -2,6 +2,9 @@ import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
 import { WorkInfo } from '../net/WorkInfo';
+import MediaData from '../entity/MediaData';
+import { MEDIA_SERVICE, PLAY_MEDIA_DATA } from '../constant/AppStorageConstant';
+import { MediaService } from '../service/MediaService';
 
 @Preview
 @Entry
@@ -11,19 +14,21 @@ struct Player {
   mdListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
   lgListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
 
-  @State title: string = '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話'
-  @State author: string = 'alist'
-  @State duration: number = 100
-  @State artImage: string = 'http://i0.hdslb.com/bfs/archive/60edd7256f0f49dbd272f8984481a2962f9519a4.jpg@672w_378h_1c_!web-home-common-cover'
+  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
+
+  @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
+    id: '0',
+    title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
+    duration: 100,
+    mediaUrl: '',
+    imageUrl: 'http://i0.hdslb.com/bfs/archive/60edd7256f0f49dbd272f8984481a2962f9519a4.jpg@672w_378h_1c_!web-home-common-cover',
+    singer:  'alist'
+  }
+
   @State smContainer:boolean = true
   @State mdContainer:boolean = false
   @State lgContainer:boolean = false
   aboutToAppear(): void {
-    const work = (router.getParams() as WorkInfo)
-    this.title = work.title
-    this.author = work.name
-    this.duration = work.duration
-    this.artImage = work.mainCoverUrl
     this.smListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
     this.lgListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.lgLine(mediaQueryResult)})
@@ -139,7 +144,7 @@ struct Player {
 
   @Builder artArea() {
     Column(){
-      Image(this.artImage).height(240).width(240).aspectRatio(1).objectFit(ImageFit.Cover)
+      Image(this.mediaData.imageUrl).height(240).width(240).aspectRatio(1).objectFit(ImageFit.Cover)
     }.width('100%')
     .justifyContent(FlexAlign.Center)
     .height(400)
@@ -148,13 +153,13 @@ struct Player {
   @Builder titleArea(){
     Row(){
       SubHeader({
-        primaryTitle:this.title,
-        secondaryTitle:this.author,
+        primaryTitle:this.mediaData.title,
+        secondaryTitle:this.mediaData.singer,
         operationType:OperationType.ICON_GROUP,
         operationItem:[{
           value:$r('sys.symbol.heart'),
           action:()=>{
-            console.info('收藏'+this.title)
+            console.info('收藏'+this.mediaData.title)
           }
         }],
         operationSymbolOptions:[{fontSize:32,fontColor:[Color.Red]}]
@@ -173,7 +178,7 @@ struct Player {
       .height(48).width('100%')
       Column(){
         Row(){
-          Progress({value: 0, total:this.duration,type:ProgressType.Linear})
+          Progress({value: 0, total:this.mediaData.duration,type:ProgressType.Linear})
         }.width('100%')
         Row(){
           Text(`00:00`)

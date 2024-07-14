@@ -2,46 +2,15 @@ import { media } from '@kit.MediaKit'
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit'
 import { LogUtil } from '../util/LogUtil'
 import { audio } from '@kit.AudioKit'
+import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
+  PlayerMode,
+  PLAY_MEDIA_DATA,
+  PLAY_MODE,
+  PLAY_STATE } from '../constant/AppStorageConstant'
+import  MediaData  from '../entity/MediaData'
 
-/**
- * 当前avplayer状态
- * */
-export const PLAY_STATE:string = 'playerState'
-/**
- * 当前播放时长
- * */
-export const CURRENT_TIME:string ='currentTime'
-/**
- * 当前媒体时长
- * */
-export const DURATION:string ='duration'
-/**
- * 媒体服务
- * */
-export const MEDIA_SERVICE:string ='mediaService'
-/**
- * 播放模式
- * */
-export const PLAY_MODE:string ='playMode'
-/**
- * 播放列表下表
- * */
-export const PLAY_INDEX:string ='playIndex'
-/**
- * 播放媒体数据
- * */
-export const PLAY_MEDIA_DATA:string ='playMediaData'
 
-export interface MediaData {
-  id: string
-  title: string
-  mediaUrl: string
-  imageUrl: string
-  singer: string
-  from: string
-}
 
-export type PlayerMode = 'order' | 'random' | 'single'
 
 export class MediaService {
   private static instance?: MediaService
@@ -143,6 +112,68 @@ export class MediaService {
     this.avPlayer?.off('durationUpdate')
     this.avPlayer?.off("error")
   }
+
+  addPlayData(...media:MediaData[]){
+    media.forEach(mediaData=>{
+      if (this.mediaDataIndex(mediaData) == -1) {
+        this.playerList.push(mediaData)
+      }
+    })
+  }
+
+  removePlayData(media:MediaData){
+  }
+
+  clearPlayList(){
+    this.playerList.length = 0
+  }
+  
+  playMedia(media?:MediaData){
+    if(media){
+      AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+      if(this.mediaDataIndex(media) == -1){
+        this.playerList.push(media)
+      }
+    }
+    if (this.avPlayer?.state == 'idle' && media && media.mediaUrl?.trim().length>0) {
+      this.avPlayer.url = media.mediaUrl
+    }
+    if (this.avPlayer?.state != 'idle') {
+      this.avPlayer?.play()
+    }
+  }
+
+  /**
+   * 媒体在列表中的位置
+   * */
+  private mediaDataIndex(media:MediaData):number{
+    return this.playerList.findIndex(mediaData=>media.id == mediaData.id && media.source == mediaData.source)
+  }
+
+  playNext(){
+
+  }
+
+  playPrev(){
+
+  }
+
+  changeMode(){
+    if (this.avPlayer) {
+      const modes = ['order','random','single']
+      const index = modes.indexOf(this.playerMode) + 1
+      const mode = (index>= modes.length? modes[0] : modes[index]) as PlayerMode
+      if (mode == 'single') {
+        this.avPlayer!.loop = true
+      }else {
+        this.avPlayer!.loop = false
+      }
+      this.playerMode = mode
+      AppStorage.setOrCreate<PlayerMode>(PLAY_MODE,mode)
+    }
+  }
+
+
 
 
   private constructor() {
