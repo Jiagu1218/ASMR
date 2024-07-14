@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from '@ohos/axios';
+import axios, { AxiosError, AxiosResponse } from '@ohos/axios';
 import { DomUtils, parseDocument } from '@ohos/htmlparser2';
 import { Article } from '../entity/Article';
 import { taskpool } from '@kit.ArkTS';
@@ -115,6 +115,19 @@ export namespace WebResource {
         return res.data
       }
       return []
+    })
+  }
+
+
+  export async function getJmComic(){
+    axios.get<string>('https://www.cartoon18.com/').then((res:AxiosResponse<string>) =>{
+      if (res.status == 200) {
+        let dom = parseDocument(res.data)
+        const comics = DomUtils.getElements({ ["class"]: "p-b-15 p-l-5 p-r-5" }, dom,true)
+        console.info('getJmComic',comics)
+      }
+    }).catch((e:AxiosError)=>{
+      console.error('getJmComic',e)
     })
   }
 }

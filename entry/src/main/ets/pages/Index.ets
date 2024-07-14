@@ -60,7 +60,7 @@ struct Index {
   }*/
 
   aboutToAppear(): void {
-    WebResource.getWorks()
+    WebResource.getJmComic()
     this.loading = true
     emitter.once("dataSourcePool_init",()=>{
       setTimeout(()=>{
