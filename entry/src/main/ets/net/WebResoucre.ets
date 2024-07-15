@@ -6,6 +6,7 @@ import { LogUtil } from '../util/LogUtil';
 import { Works } from './Works';
 import { WorkTracks } from './WorkTrack';
 import { parseVttFileStr } from '../util/VttUtil';
+import { WebVtt } from '../entity/WebVttData';
 
 export namespace WebResource {
 
@@ -132,14 +133,16 @@ export namespace WebResource {
     })
   }
 
-  export async function getVtt(){
-    axios.get<string>('https://api.asmr-200.com/api/media/stream/1203410/1093366').then((res:AxiosResponse<string>)=>{
+  export async function getVtt(url:string):Promise<WebVtt>{
+    return axios.get<string>(url).then((res:AxiosResponse<string>)=>{
       if (res.status == 200) {
         console.info('getJmComic',res.data)
-        parseVttFileStr(res.data)
+        return parseVttFileStr(res.data)
       }
+      return []
     }).catch((e:AxiosError)=>{
       console.error('getVtt',e)
+      return []
     })
   }
 }

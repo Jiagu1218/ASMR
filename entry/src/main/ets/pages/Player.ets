@@ -1,10 +1,12 @@
 import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
-import { WorkInfo } from '../net/WorkInfo';
 import MediaData from '../entity/MediaData';
-import { MEDIA_SERVICE, PLAY_MEDIA_DATA } from '../constant/AppStorageConstant';
+import { CURRENT_TIME, DURATION, MEDIA_SERVICE, PLAY_MEDIA_DATA } from '../constant/AppStorageConstant';
 import { MediaService } from '../service/MediaService';
+import { WebVtt, WebVttData } from '../entity/WebVttData';
+import { WebResource } from '../net/WebResoucre';
+import { parseMillisecondDuration, parseSecondDuration } from '../util/DayJsUtil';
 
 @Preview
 @Entry
@@ -16,6 +18,9 @@ struct Player {
 
   @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
 
+  @State lyrics:WebVtt = []
+  @StorageLink(DURATION) duration:number = 0
+  @StorageLink(CURRENT_TIME) currentTime:number = 0
   @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
     id: '0',
     title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
@@ -29,6 +34,9 @@ struct Player {
   @State mdContainer:boolean = false
   @State lgContainer:boolean = false
   aboutToAppear(): void {
+    WebResource.getVtt('https://api.asmr-200.com/api/media/stream/1204108/1094279').then(vtt => {
+      this.lyrics = vtt
+    })
     this.smListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
     this.lgListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.lgLine(mediaQueryResult)})
@@ -133,7 +141,9 @@ struct Player {
 
   @Builder headerArea() {
     Row(){
-      SymbolGlyph($r('sys.symbol.chevron_down')).fontSize(32)
+      SymbolGlyph($r('sys.symbol.chevron_down')).fontSize(32).onClick(()=>{
+        router.back()
+      })
       AVCastPicker({ normalColor: Color.Red, activeColor: Color.Blue, onStateChange: this.onStateChange })
         .width(32)
         .height(32)
@@ -178,11 +188,11 @@ struct Player {
       .height(48).width('100%')
       Column(){
         Row(){
-          Progress({value: 0, total:this.mediaData.duration,type:ProgressType.Linear})
+          Progress({value: this.currentTime, total:this.mediaData.duration,type:ProgressType.Linear})
         }.width('100%')
         Row(){
-          Text(`00:00`)
-          Text(`00:00`)
+          Text(`${parseMillisecondDuration(this.currentTime)}`)
+          Text(`${parseSecondDuration(this.mediaData.duration)}`)
         }.justifyContent(FlexAlign.SpaceBetween).width('100%')
       }.width('100%').height(48)
       Row(){
@@ -196,7 +206,15 @@ struct Player {
 
   @Builder lyricsArea() {
     Column(){
-
+      List(){
+        Repeat<WebVttData>(this.lyrics).each(webVttDataItem=>{
+          Repeat<string>(webVttDataItem.item.subtitles).each(subtitle=>{
+            ListItem(){
+              Text(subtitle.item)
+            }.width('100%')
+          }).key(item=>webVttDataItem.item.index+item)
+        }).key(item=>item.index+'')
+      }
     }.height('100%').width('100%').backgroundColor(Color.Red)
   }
 

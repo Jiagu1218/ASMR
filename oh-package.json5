@@ -4,7 +4,8 @@
   "dependencies": {
     "@ohos/axios": "^2.2.0",
     "@ohos/htmlparser2": "^1.0.0",
-    "domhandler": "^5.0.3"
+    "domhandler": "^5.0.3",
+    "dayjs": "^1.11.7"
   },
   "devDependencies": {
     "@ohos/hypium": "1.0.18",
