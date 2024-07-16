@@ -7,11 +7,18 @@ import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
 import { parseMillisecondDuration, parseSecondDuration } from '../util/DayJsUtil';
+import { Lyrics } from '../component/Lyrics';
 
 @Preview
 @Entry
 @Component
 struct Player {
+  //用来配置CanvasRenderingContext2D对象和OffscreenCanvasRenderingContext2D对象的参数，包括是否开启抗锯齿。true表明开启抗锯齿
+  private settings: RenderingContextSettings = new RenderingContextSettings(true)
+  private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
+  //用来创建OffscreenCanvas对象，width为离屏画布的宽度，height为离屏画布的高度。通过在canvas中调用OffscreenCanvasRenderingContext2D对象来绘制。
+  private offCanvas: OffscreenCanvas = new OffscreenCanvas(600, 600)
+
   smListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width < 520vp)')
   mdListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
   lgListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
@@ -19,8 +26,9 @@ struct Player {
   @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
 
   @State lyrics:WebVtt = []
+  @State lyricIndex:number = 0
   @StorageLink(DURATION) duration:number = 0
-  @StorageLink(CURRENT_TIME) currentTime:number = 0
+  @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
   @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
     id: '0',
     title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
@@ -33,6 +41,12 @@ struct Player {
   @State smContainer:boolean = true
   @State mdContainer:boolean = false
   @State lgContainer:boolean = false
+
+  onTimeUpdate(){
+    const currentTime = this.currentTime
+    this.lyricIndex = this.lyrics.findIndex(vtt=>vtt.startTime>=currentTime && vtt.endTime<currentTime)
+  }
+
   aboutToAppear(): void {
     WebResource.getVtt('https://api.asmr-200.com/api/media/stream/1204108/1094279').then(vtt => {
       this.lyrics = vtt
@@ -206,16 +220,33 @@ struct Player {
 
   @Builder lyricsArea() {
     Column(){
-      List(){
-        Repeat<WebVttData>(this.lyrics).each(webVttDataItem=>{
-          Repeat<string>(webVttDataItem.item.subtitles).each(subtitle=>{
-            ListItem(){
-              Text(subtitle.item)
-            }.width('100%')
-          }).key(item=>webVttDataItem.item.index+item)
-        }).key(item=>item.index+'')
-      }
-    }.height('100%').width('100%').backgroundColor(Color.Red)
+      Lyrics()
+      // Canvas(this.context)
+      //   .height('100%')
+      //   .width('100%')
+      //   .backgroundColor('#ffff00')
+      //   .onReady(()=>{
+      //     let offContext = this.offCanvas.getContext("2d",this.settings)
+      //     offContext.font = '30px sans-serif'
+      //     setTimeout(()=>{
+      //       this.lyrics.forEach((data:WebVttData,index:number)=>{
+      //         data.subtitles.forEach((str:string,i)=>{
+      //           offContext.fillText(str,50,(index+1)*(i+1)*50)
+      //         })
+      //       })
+      //       this.context.transferFromImageBitmap(offContext.transferToImageBitmap())
+      //     },3000)
+      //   })
+      // List(){
+      //   Repeat<WebVttData>(this.lyrics).each(webVttDataItem=>{
+      //     Repeat<string>(webVttDataItem.item.subtitles).each(subtitle=>{
+      //       ListItem(){
+      //         Text(subtitle.item)
+      //       }.width('100%')
+      //     }).key(item=>webVttDataItem.item.index+item)
+      //   }).key(item=>item.index+'')
+      // }
+    }.height('100%').width('100%')
   }
 
   @Builder otherArea() {
