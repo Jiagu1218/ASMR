@@ -86,7 +86,7 @@ struct AsmrWork {
             FlowItem(){
               WorkCard({work:work}).onClick(()=>{
                 LogUtil.info('Work card',work.source_id)
-                this.mediaService.playMedia({
+                this.mediaService.addPlayData({
                   id:work.source_id,
                   title:work.title,
                   duration:work.duration,

@@ -1,6 +1,5 @@
 import { Tag, WorkInfo } from '../net/WorkInfo'
 import { LengthMetrics } from '@ohos.arkui.node'
-import { TestDialog } from './TestDialog'
 
 /**
  * 图片上文字样式
@@ -22,10 +21,6 @@ import { TestDialog } from './TestDialog'
 @Preview
 @Component
 export struct WorkCard{
-
-  dialogController: CustomDialogController = new CustomDialogController({
-    builder: TestDialog(),
-  })
 
   @Require @Prop work:WorkInfo
   //   = {

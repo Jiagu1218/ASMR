@@ -3,7 +3,7 @@
  * */
 export const PLAY_STATE:string = 'playerState'
 /**
- * 当前播放时长
+ * 当前播放时长（ms）
  * */
 export const CURRENT_TIME:string ='currentTime'
 /**
@@ -27,7 +27,13 @@ export const PLAY_INDEX:string ='playIndex'
  * */
 export const PLAY_MEDIA_DATA:string ='playMediaData'
 
+/**
+ * 文件树
+ * */
+export const WORK_TRACKS:string = 'WorkTracks'
+
 export type PlayerMode = 'order' | 'random' | 'single'
+
 
 /**
  * 资源池初始化完成消息

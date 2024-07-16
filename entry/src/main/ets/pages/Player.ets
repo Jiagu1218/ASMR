@@ -2,12 +2,16 @@ import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
 import MediaData from '../entity/MediaData';
-import { CURRENT_TIME, DURATION, MEDIA_SERVICE, PLAY_MEDIA_DATA } from '../constant/AppStorageConstant';
+import { CURRENT_TIME, DURATION, MEDIA_SERVICE, PLAY_MEDIA_DATA, WORK_TRACKS } from '../constant/AppStorageConstant';
 import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
 import { parseMillisecondDuration, parseSecondDuration } from '../util/DayJsUtil';
 import ShiLrcView, { LrcEntry } from '../component/Lyrics';
+import { WorkTrack, WorkTracks } from '../net/WorkTrack';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { LogUtil } from '../util/LogUtil';
+import { WorkTrackDialog } from '../component/WorkTrackDialog';
 
 @Preview
 @Entry
@@ -30,6 +34,7 @@ struct Player {
   @State lyricsArray:LrcEntry[] = []
   @StorageLink(DURATION) duration:number = 0
   @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
+  @StorageLink(WORK_TRACKS) workTracks:WorkTracks = []
   @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
     id: '0',
     title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
@@ -38,34 +43,66 @@ struct Player {
     imageUrl: 'http://i0.hdslb.com/bfs/archive/60edd7256f0f49dbd272f8984481a2962f9519a4.jpg@672w_378h_1c_!web-home-common-cover',
     singer:  'alist'
   }
-
+  @State @Watch('workTrackChange') workTrack:WorkTrack|null = null
   @State smContainer:boolean = true
   @State mdContainer:boolean = false
   @State lgContainer:boolean = false
 
+  dialogController: CustomDialogController = new CustomDialogController({
+    builder:WorkTrackDialog({showList:this.workTracks,selectWorkTrack:$workTrack})
+  })
+
+  workTrackChange(){
+    if (this.workTrack){
+      switch (this.workTrack.type){
+        case 'audio':
+          this.mediaData.mediaUrl = (this.workTrack.mediaStreamUrl || this.workTrack.streamLowQualityUrl) as string
+          this.mediaService.playMedia(this.mediaData)
+          break
+        case 'text':
+          const title = this.workTrack.title
+          if (title.slice(title.lastIndexOf('.')+1) == 'vtt'){
+            WebResource.getVtt(this.workTrack.mediaDownloadUrl as string).then(vtt => {
+              this.coverToLyrics(vtt);
+            })
+          }
+          break
+        default:
+        break
+
+      }
+    }
+  }
   onTimeUpdate(){
     const currentTime = this.currentTime
     this.lyricIndex = this.lyrics.findIndex(vtt=>vtt.startTime>=currentTime && vtt.endTime<currentTime)
   }
 
   aboutToAppear(): void {
-    setInterval(()=>{
-      this.currentTime = this.currentTime + 1000
-    },1000)
-    WebResource.getVtt('https://api.asmr-200.com/api/media/stream/1204108/1094279').then(vtt => {
-      this.lyrics = vtt
-      this.lyricsArray = vtt.map<LrcEntry>(data =>{
-        return{
-          lineWords:data.subtitles[0],
-          lineStartTime:data.startTime,
-          lineDuration:(data.endTime - data.startTime),
-          words:[]
-        }
-      })
-    })
     this.smListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
     this.lgListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.lgLine(mediaQueryResult)})
+  }
+
+  menu(){
+    WebResource.getWorkTracks(this.mediaData.id).then(workTracks=>{
+      AppStorage.setOrCreate<WorkTracks>(WORK_TRACKS,workTracks)
+      this.dialogController.open()
+    }).catch((e:BusinessError)=>{
+      LogUtil.error(e.message)
+    })
+  }
+
+  coverToLyrics(vtt: WebVtt) {
+    this.lyrics = vtt;
+    this.lyricsArray = vtt.map<LrcEntry>(data => {
+      return {
+        lineWords: data.subtitles[0],
+        lineStartTime: data.startTime,
+        lineDuration: (data.endTime - data.startTime),
+        words: []
+      };
+    });
   }
 
   aboutToDisappear(): void {
@@ -209,7 +246,9 @@ struct Player {
         SymbolGlyph($r('sys.symbol.repeat')).fontSize(32)
         SymbolGlyph($r('sys.symbol.arrowshape_down_to_line_fill')).fontSize(32)
         SymbolGlyph($r('sys.symbol.speaker_wave_3')).fontSize(32)
-        SymbolGlyph($r('sys.symbol.dot_grid_2x2')).fontSize(32)
+        SymbolGlyph($r('sys.symbol.dot_grid_2x2')).fontSize(32).onClick(()=>{
+          this.menu()
+        })
       }.justifyContent(FlexAlign.SpaceAround)
       .height(48).width('100%')
       Column(){
@@ -233,22 +272,6 @@ struct Player {
   @Builder lyricsArea() {
     Column(){
       ShiLrcView({mLrcEntryList:this.lyricsArray,isPlay:true,lyricMilliSecondsTime:this.currentTime})
-      // Canvas(this.context)
-      //   .height('100%')
-      //   .width('100%')
-      //   .backgroundColor('#ffff00')
-      //   .onReady(()=>{
-      //     let offContext = this.offCanvas.getContext("2d",this.settings)
-      //     offContext.font = '30px sans-serif'
-      //     setTimeout(()=>{
-      //       this.lyrics.forEach((data:WebVttData,index:number)=>{
-      //         data.subtitles.forEach((str:string,i)=>{
-      //           offContext.fillText(str,50,(index+1)*(i+1)*50)
-      //         })
-      //       })
-      //       this.context.transferFromImageBitmap(offContext.transferToImageBitmap())
-      //     },3000)
-      //   })
       // List(){
       //   Repeat<WebVttData>(this.lyrics).each(webVttDataItem=>{
       //     Repeat<string>(webVttDataItem.item.subtitles).each(subtitle=>{

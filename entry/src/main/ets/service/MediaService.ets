@@ -117,6 +117,9 @@ export class MediaService {
     media.forEach(mediaData=>{
       if (this.mediaDataIndex(mediaData) == -1) {
         this.playerList.push(mediaData)
+        if (this.avPlayer?.state != 'playing') {
+          AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,mediaData)
+        }
       }
     })
   }

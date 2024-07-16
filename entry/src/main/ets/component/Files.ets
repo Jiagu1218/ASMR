@@ -296,7 +296,7 @@ export struct Files{
     }
   ]
   @State selectIndex:number = -1
-
+  @Link selectWorkTrack:WorkTrack|null
   listStack:StackList<WorkTracks> = new StackList()
   //显示层级
   @State level:number = 0
@@ -416,8 +416,10 @@ export struct Files{
     }.onClick(()=>{
       if (this.selectIndex != index){
         this.selectIndex = index
+        this.selectWorkTrack = track
       }else{
         this.selectIndex = -1
+        this.selectWorkTrack = null
       }
     })
   }

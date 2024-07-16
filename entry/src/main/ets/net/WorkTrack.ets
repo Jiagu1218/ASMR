@@ -7,7 +7,7 @@ export interface WorkTracks extends Array<WorkTrack>{
  * */
 export interface WorkTrack {
   /**
-   * 类型
+   * 类型(audio,folder,text)
    * */
   type: string
   /**
