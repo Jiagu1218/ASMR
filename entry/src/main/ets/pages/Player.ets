@@ -7,7 +7,7 @@ import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
 import { parseMillisecondDuration, parseSecondDuration } from '../util/DayJsUtil';
-import { Lyrics } from '../component/Lyrics';
+import ShiLrcView, { LrcEntry } from '../component/Lyrics';
 
 @Preview
 @Entry
@@ -27,6 +27,7 @@ struct Player {
 
   @State lyrics:WebVtt = []
   @State lyricIndex:number = 0
+  @State lyricsArray:LrcEntry[] = []
   @StorageLink(DURATION) duration:number = 0
   @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
   @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
@@ -48,8 +49,19 @@ struct Player {
   }
 
   aboutToAppear(): void {
+    setInterval(()=>{
+      this.currentTime = this.currentTime + 1000
+    },1000)
     WebResource.getVtt('https://api.asmr-200.com/api/media/stream/1204108/1094279').then(vtt => {
       this.lyrics = vtt
+      this.lyricsArray = vtt.map<LrcEntry>(data =>{
+        return{
+          lineWords:data.subtitles[0],
+          lineStartTime:data.startTime,
+          lineDuration:(data.endTime - data.startTime),
+          words:[]
+        }
+      })
     })
     this.smListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
@@ -202,7 +214,7 @@ struct Player {
       .height(48).width('100%')
       Column(){
         Row(){
-          Progress({value: this.currentTime, total:this.mediaData.duration,type:ProgressType.Linear})
+          Progress({value: this.currentTime, total:this.mediaData.duration*1000,type:ProgressType.Linear})
         }.width('100%')
         Row(){
           Text(`${parseMillisecondDuration(this.currentTime)}`)
@@ -220,7 +232,7 @@ struct Player {
 
   @Builder lyricsArea() {
     Column(){
-      Lyrics()
+      ShiLrcView({mLrcEntryList:this.lyricsArray,isPlay:true,lyricMilliSecondsTime:this.currentTime})
       // Canvas(this.context)
       //   .height('100%')
       //   .width('100%')
@@ -246,7 +258,7 @@ struct Player {
       //     }).key(item=>webVttDataItem.item.index+item)
       //   }).key(item=>item.index+'')
       // }
-    }.height('100%').width('100%')
+    }.height('100%').width('100%').backgroundColor(Color.Blue)
   }
 
   @Builder otherArea() {

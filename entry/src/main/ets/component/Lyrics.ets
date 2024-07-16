@@ -1,128 +1,840 @@
-import { NodeController, FrameNode, RenderNode, DrawContext } from '@kit.ArkUI'
-import { UIContext } from '@kit.ArkUI'
-import { drawing } from '@kit.ArkGraphics2D'
-import { text } from '@kit.ArkGraphics2D'
-import { image } from '@kit.ImageKit'
-import { common2D } from '@kit.ArkGraphics2D'
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-class LyricsRendererNode extends RenderNode{
-  private content:string
-  constructor(content:string) {
-    super()
-    this.content = content
+import { Animator, AnimatorResult } from '@kit.ArkUI';
+import { LogUtil } from '../util/LogUtil';
+
+export interface Word {
+  /**
+   * What is this character
+   */
+  text: string;
+
+  /**
+   * This character is relative to the start time of the line. Unit: ms.
+   */
+  wordStartTime: number;
+
+  /**
+   * The duration of this character. Unit: ms.
+   */
+  duration: number;
+}
+
+export interface LrcEntry {
+  /**
+   * The start time of this line of lyrics. Unit: ms.
+   */
+  lineStartTime: number;
+
+  /**
+   * The duration of this line of lyrics. Unit: ms.
+   */
+  lineDuration: number;
+
+  /**
+   * This Line lyrics.
+   */
+  lineWords: string;
+
+  /**
+   * Content of each character.
+   */
+  words: Word[];
+}
+
+function angleToRadian(angle: number): number {
+  return angle * Math.PI / 180;
+}
+
+/**
+ * Lyrics scrolling effect.
+ */
+export const enum LyricScrollEffect {
+  /**
+   * Full line scrolling
+   */
+  Line,
+
+  /**
+   * Gradient Color
+   */
+  LetterGradient,
+
+  /**
+   * Single character scaling and gradation.
+   */
+  LetterScaleGradient,
+
+  /**
+   * Star scrolling style.
+   */
+  LetterStar
+}
+
+/**
+ * Lyrics initial position
+ */
+export const enum LyricTopPosition {
+  Top,
+  Middle,
+}
+
+export class LyricFile {
+  static readonly KRC: string = '.krc';
+  static readonly LRC: string = '.lrc';
+}
+
+class Rectangle {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+
+  constructor(left: number, top: number, right: number, bottom: number) {
+    this.left = left;
+    this.top = top;
+    this.right = right;
+    this.bottom = bottom;
   }
-  async draw(context: DrawContext){
-    // 设置画笔和画刷样式
-    let pen = new drawing.Pen()
-    let pen_color : common2D.Color = { alpha: 0xFF, red: 0x00, green: 0x00, blue: 0x00 }
-    pen.setColor(pen_color)
-    context.canvas.attachPen(pen)
 
-    // 创建一个画刷Brush对象，Brush对象用于形状的填充
-    let brush = new drawing.Brush()
-    let brush_color : common2D.Color = { alpha: 0xFF, red: 0x00, green: 0xFF, blue: 0x00 }
-    brush.setColor(brush_color)
-    context.canvas.attachPen(pen)
+  public isIn(x: number, y: number) {
+    return x >= this.left && x <= this.right && y >= this.top && y <= this.bottom;
+  }
 
-    //字体颜色，字重，字体大小等属性由此设置
-    let myTextStyle: text.TextStyle = {
-      color: { alpha: 255, red: 255, green: 0, blue: 0 },
-    };
-    //断词类型，换行策略，文本方向以及对齐方式由此设置
-    let myParagraphStyle: text.ParagraphStyle = {
-      textStyle: myTextStyle,
-      align: 3,
-      //wordBreak:text.WordBreak.NORMAL 文本断词类型
-    };
-    let fontCollection = new text.FontCollection();
-    let ParagraphGraphBuilder = new text.ParagraphBuilder(myParagraphStyle, fontCollection);
-    //更新文本样式
-    ParagraphGraphBuilder.pushStyle(myTextStyle);
-    //添加文本
-    ParagraphGraphBuilder.addText(this.content);
-    //生成段落
-    let paragraph = ParagraphGraphBuilder.build();
-    // 布局
-    paragraph.layoutSync(600);
-    //绘制文本
-    paragraph.paint(context.canvas, 0, 0);
+  toString() {
+    return `[Rectangle] = ${this.left}, ${this.top}, ${this.right},${this.bottom}`;
   }
 }
 
-class LyricsNodeController extends NodeController{
-  private rootNode: FrameNode | null = null;
-  makeNode(uiContext: UIContext): FrameNode | null {
-    this.rootNode = new FrameNode(uiContext)
-    if (this.rootNode == null) {
-      return this.rootNode
-    }
-    const renderNode = this.rootNode.getRenderNode()
-    if (renderNode != null) {
-      //设置组件的布局大小和位置
-      renderNode.frame = { x: 50, y: 50, width: 500, height: 500 }
-      //设置组件的轴心坐标
-      renderNode.pivot = { x: 275, y: 275 }
-    }
-    return this.rootNode
-  }
+/**
+ * Default number of rows.
+ */
+const NONE_LINE: number = -1;
 
-  /**
-   * 添加节点
-   * */
-  addNode(node: RenderNode): void {
-    if (this.rootNode == null) {
-      return
-    }
-    const renderNode = this.rootNode.getRenderNode()
-    if (renderNode != null) {
-      renderNode.appendChild(node)
-    }
-  }
+/**
+ * Stars a few corners
+ */
+const STAR_ANGLE_NUMBER: number = 5;
 
-  /**
-   * 删除节点
-   * */
-  clearNodes(): void {
-    if (this.rootNode == null) {
-      return
-    }
-    const renderNode = this.rootNode.getRenderNode()
-    if (renderNode != null) {
-      renderNode.clearChildren()
-    }
-  }
+/**
+ * No lyrics.
+ */
+const EMPTY_LYRIC: LrcEntry = {
+  lineStartTime: 0,
+  lineDuration: 0,
+  lineWords: '此歌曲为纯音乐，请您欣赏',
+  words: []
+};
 
-}
+/**
+ * Lyrics gradient color spacing.
+ */
+const GRADIENT_PROGRESS_SPACE = 0.0000001;
+
+/**
+ * Lyrics gradient color spacing.
+ */
+const GRADIENT_PROGRESS_MAX = 1 - GRADIENT_PROGRESS_SPACE;
 
 @Component
-export struct Lyrics{
-  @State controller:LyricsNodeController = new LyricsNodeController()
-  @State node:LyricsRendererNode = new LyricsRendererNode('设置画笔和画刷样式')
-  test(){
-    // 定义newNode的像素格式
-    //设置组件的布局大小和位置
-    this.node.frame = { x: 50, y: 50, width: 500, height: 500 }
-    //设置组件的轴心坐标
-    this.node.pivot = { x: 275, y: 275 }
-  }
-  build() {
-    Column() {
-      Row() {
-        NodeContainer(this.controller)
-          .height('100%').width('100%')
-        Button("Draw Text")
-          .margin({ bottom: 200, right: 12 })
-          .onClick(() => {
-            // this.controller.clearNodes()
-            this.test()
-            this.controller.addNode(this.node)
-          })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.Center)
-      .shadow(ShadowStyle.OUTER_DEFAULT_SM)
-      .alignItems(VerticalAlign.Bottom)
-      .layoutWeight(1)
+export default struct ShiLrcView {
+  /**
+   * Current lyric time [ms].
+   */
+  @Prop @Watch('onTimeUpdated') lyricMilliSecondsTime: number;
+  /**
+   * Lyrics content.
+   */
+  @Require @Prop @Watch('onLyricUpdated') mLrcEntryList: Array<LrcEntry> = [];
+  /**
+   * Lyrics scrolling effect.
+   */
+  @Prop @Watch('onTimeUpdated') lyricScrollEffect: LyricScrollEffect = LyricScrollEffect.Line;
+  @Prop @Watch('playLyrics') isPlay: boolean = false;
+  private readonly mNormalTextColor = '#99ffffff';
+  private viewWidth: number = 360;
+  private viewHeight: number = 500;
+  private settings: RenderingContextSettings = new RenderingContextSettings(true);
+  private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
+  private mCurrentLine: number = NONE_LINE;
+  private lyricRectangle: Rectangle = new Rectangle(0, 0, 0, 0);
+  private readonly TEXT_ADD_SIZE = 2;
+  /**
+   * Location of the lyrics.
+   */
+  private readonly lyricTopPosition: LyricTopPosition = LyricTopPosition.Top;
+  /**
+   * Initial position of the first line of the lyrics.
+   */
+  private initFirstLineY: number = 0;
+  private animator: AnimatorResult = Animator.create({
+    duration: 400,
+    easing: 'linear',
+    delay: 0,
+    fill: 'forwards',
+    direction: 'normal',
+    iterations: 1,
+    begin: 0,
+    end: 1
+  });
+  /**
+   * Text size of the lyrics, in vp.
+   */
+  private mNormalTextSize: number = 20;
+  /**
+   * Spacing of each line of lyrics, in vp. This spacing plays the star animation or white dot disappearing effect.
+   */
+  private mDividerHeight = 24;
+  /**
+   * Size of the current lyrics, in vp.
+   */
+  private mCurrentTextSize: number = 24;
+  /**
+   * Lyrics font.
+   */
+  private fontFamily = 'HarmonyHeiTi';
+  /**
+   * The text color of the currently displayed lyrics
+   */
+  private mCurrentTextColor = '#FFFFFF';
+  /**
+   * 歌词字体粗细.
+   */
+  private fontWeight = 'bold';
+  /**
+   * 歌词与左边框之间的距离.
+   */
+  private paddingLeft = 0;
+  /**
+   * 歌词与右边框之间的距离.
+   */
+  private paddingRight = 0;
+  /**
+   * 歌词与上边框之间的距离.
+   */
+  private paddingTop = 0;
+  /**
+   * 歌词与下边界之间的距离.
+   */
+  private paddingBottom = 0;
+  /**
+   * 歌词的宽度.
+   */
+  private lrcWidth: number = 0;
+  /**
+   * 歌词高度。
+   */
+  private lrcHeight: number = 0;
+  /**
+   * 每行文本的 X 轴位置。
+   */
+  private lrcX: number = 0;
+  /**
+   * 每行文本的 Y 轴位置。
+   */
+  private lrcY: number = 0;
+  /**
+   * 记录当前画布偏移。
+   */
+  private curCanvasOffsetY: number = 0;
+  /**
+   * 星星的每个角度是多少度。
+   */
+  private starAverageAngle: number = 0;
+  /**
+   * 星星的外角。
+   */
+  private starOutCircleAngle: number = 0;
+  /**
+   * 星星的内角。
+   */
+  private starInCircleAngle: number = 0;
+  /**
+   * 星星的路径。
+   */
+  private starsPath2D: Path2D = new Path2D();
+  /**
+   * 星星颜色
+   */
+  private starsColor: string = '#18BBFC';
+  /**
+   * 画布最小偏移量 y。
+   */
+  private canvasMinOffsetY: number = 0;
+  /**
+   * 画布最大偏移量 y。
+   */
+  private canvasMaxOffsetY: number = 0;
+
+  startAnimator(desOffsetY: number) {
+    if (this.animator) {
+      this.animator.finish();
     }
+
+    this.animator = Animator.create({
+      duration: 400,
+      easing: 'linear',
+      delay: 0,
+      fill: 'forwards',
+      direction: 'normal',
+      iterations: 1,
+      begin: this.curCanvasOffsetY,
+      end: -desOffsetY
+    });
+    let that = this;
+    LogUtil.info('[startAnimator] curOffset:' + this.curCanvasOffsetY + ',desOffset:' + (-desOffsetY));
+    this.animator.onFrame = (value) => {
+      that.drawContent(value);
+    };
+    this.animator.onCancel = () => {
+    };
+    this.animator.onFinish = () => {
+    };
+    this.animator.play();
+  }
+
+  playLyrics() {
+    if (this.isPlay) {
+      this.animator.play();
+    } else {
+      this.animator.pause();
+    }
+  }
+
+  /**
+   * 画一颗星星。
+   *
+   * @param x
+   * @param y
+   * @param outRadius
+   * @param inRadius
+   * @param rotateAngle
+   */
+  private drawStars(x: number, y: number, outRadius: number, inRadius: number, rotateAngle: number) {
+    this.starsPath2D = new Path2D();
+    this.context.fillStyle = this.starsColor;
+    for (let i = 0; i < STAR_ANGLE_NUMBER; i++) {
+      let outX = (
+        Math.cos(angleToRadian(rotateAngle + this.starOutCircleAngle + i * this.starAverageAngle)) * outRadius) + x;
+      let outY = -(
+        Math.sin(angleToRadian(rotateAngle + this.starOutCircleAngle + i * this.starAverageAngle)) * outRadius) + y;
+      let inX = (
+        Math.cos(angleToRadian(rotateAngle + this.starInCircleAngle + i * this.starAverageAngle)) * inRadius) + x;
+      let inY = -(
+        Math.sin(angleToRadian(rotateAngle + this.starInCircleAngle + i * this.starAverageAngle)) * inRadius) + y;
+      if (i === 0) {
+        this.starsPath2D.moveTo(outX, outY);
+      }
+      this.starsPath2D.lineTo(outX, outY);
+      this.starsPath2D.lineTo(inX, inY);
+    }
+    this.starsPath2D.closePath();
+    this.context.fill(this.starsPath2D);
+  }
+
+  private calculate() {
+    this.lrcWidth = this.viewWidth - this.paddingLeft - this.paddingRight;
+    this.lrcHeight = this.viewHeight - this.paddingTop - this.paddingBottom;
+    if (this.initFirstLineY === 0) {
+      switch (this.lyricTopPosition) {
+        case LyricTopPosition.Middle:
+          this.initFirstLineY = this.paddingTop + this.lrcHeight / 2.8;
+          break;
+        case LyricTopPosition.Top:
+          this.initFirstLineY = this.paddingTop;
+          break;
+        default:
+          break;
+      }
+    }
+    this.lrcX = 0;
+    this.lrcY = this.initFirstLineY;
+
+    this.starAverageAngle = 360 / STAR_ANGLE_NUMBER;
+    this.starOutCircleAngle = 90 - this.starAverageAngle;
+    let halfAverageAngle = this.starAverageAngle / 2;
+    this.starInCircleAngle = halfAverageAngle + this.starOutCircleAngle;
+  }
+
+  private reset() {
+    this.lrcY = this.initFirstLineY;
+  }
+
+  drawMiddle() {
+    this.context.translate(0, -this.curCanvasOffsetY);
+    this.context.beginPath();
+    this.context.strokeStyle = Color.Red;
+    this.context.moveTo(0, this.viewHeight / 2);
+    this.context.lineTo(this.viewWidth, this.viewHeight / 2);
+    this.context.stroke();
+    this.context.closePath();
+    this.context.translate(0, this.curCanvasOffsetY);
+  }
+
+  private getLineHeight(text: string, isCurrent?: boolean): number {
+    let lineHeight = 0;
+    if (isCurrent) {
+      this.context.font = this.fontWeight + ' ' + this.mCurrentTextSize + 'vp ' + this.fontFamily;
+    } else {
+      this.context.font = this.fontWeight + ' ' + this.mNormalTextSize + 'vp ' + this.fontFamily;
+    }
+    let textMetrics: TextMetrics = this.context.measureText(text);
+    if (textMetrics.width > this.lrcWidth) {
+      let start = 0;
+      let end = text.length - 1;
+      let textTemp = text;
+      while (this.context.measureText(text.substring(start, end)).width > this.lrcWidth) {
+        if (textTemp.lastIndexOf(' ') !== -1) {
+          end = textTemp.lastIndexOf(' ');
+          textTemp = textTemp.substring(0, end);
+        } else {
+          end--;
+        }
+      }
+      if (this.context.measureText(text.substring(start, end)).width <= this.lrcWidth) {
+        lineHeight += textMetrics.height;
+        start = end;
+      }
+      if (start < text.length - 1) {
+        lineHeight += textMetrics.height;
+      }
+    } else {
+      lineHeight = textMetrics.height;
+    }
+    return lineHeight;
+  }
+
+  /**
+   * Back to Gradient.
+   * @param startX
+   * @param startY
+   * @param endX
+   * @param endY
+   * @param progress
+   * @returns
+   */
+  private progressGrad(startX: number, startY: number, endX: number, endY: number, progress: number) {
+    let grad = this.context.createLinearGradient(startX, startY, endX, endY);
+    grad.addColorStop(progress, this.mCurrentTextColor);
+    grad.addColorStop(progress + GRADIENT_PROGRESS_SPACE, this.mNormalTextColor);
+    return grad;
+  }
+
+  private drawMultipleLine(lyric: LrcEntry, textMetrics: TextMetrics, isCurrent: boolean): number {
+    let lineHeight = 0;
+    let start = 0;
+    let end = 1;
+    this.context.textAlign = 'start';
+    let text = lyric.lineWords;
+    let textTemp = lyric.lineWords;
+    end = text.length - 1;
+
+    while (this.context.measureText(text.substring(start, end)).width > this.lrcWidth) {
+      if (textTemp.lastIndexOf(' ') !== -1) {
+        end = textTemp.lastIndexOf(' ');
+        textTemp = textTemp.substring(0, end);
+      } else {
+        end--;
+      }
+    }
+
+    if (this.context.measureText(text.substring(start, end)).width <= this.lrcWidth) {
+      if (start === 0) {
+        this.lrcY = this.lrcY + textMetrics.height + this.mDividerHeight;
+      } else {
+        this.lrcY = this.lrcY + textMetrics.height;
+      }
+      lineHeight += textMetrics.height;
+
+      if (isCurrent) {
+        this.context.fillText(text.substring(start, end), this.lrcX, this.lrcY, this.lrcWidth);
+      } else {
+        this.context.fillText(text.substring(start, end), this.lrcX, this.lrcY, this.lrcWidth);
+      }
+      start = end;
+    }
+
+    if (start !== 0 && text.charAt(start) === ' ') {
+      start += 1;
+    }
+
+    if (start < text.length - 1) {
+      this.lrcY = this.lrcY + textMetrics.height;
+      lineHeight += textMetrics.height;
+      if (isCurrent) {
+        this.context.fillText(text.substring(start), this.lrcX, this.lrcY, this.lrcWidth);
+      } else {
+        this.context.fillText(text.substring(start), this.lrcX, this.lrcY, this.lrcWidth);
+      }
+    }
+    return lineHeight;
+  }
+
+  private drawSingleLine(lyric: LrcEntry, textMetrics: TextMetrics, isCurrent: boolean): number {
+    this.lrcY = this.lrcY + this.mDividerHeight + textMetrics.height;
+    let text = lyric.lineWords;
+    if (isCurrent) {
+      switch (this.lyricScrollEffect) {
+        case LyricScrollEffect.LetterScaleGradient:
+          if (lyric.words && lyric.words.length > 0) {
+            let startX = this.lrcX - textMetrics.width / 2;
+            let endX = startX + textMetrics.width;
+            let gradY = this.lrcY - textMetrics.height / 2;
+
+            let wordX = startX;
+            this.context.textAlign = 'start';
+            for (let i = 0; i < lyric.words.length; i++) {
+              let wordStartTime = lyric.lineStartTime + lyric.words[i].wordStartTime;
+              let wordEndTime = lyric.lineStartTime + lyric.words[i].wordStartTime + lyric.words[i].duration;
+              if (wordStartTime <= this.lyricMilliSecondsTime && wordEndTime >= this.lyricMilliSecondsTime) {
+                let wordProgress =
+                  (this.lyricMilliSecondsTime - wordStartTime) / lyric.words[i].duration / lyric.words.length;
+                let wordPassedProgress = i / lyric.words.length;
+                let progress = wordPassedProgress + wordProgress;
+                this.context.fillStyle = this.progressGrad(startX, gradY, endX, gradY, progress);
+                this.context.font =
+                  this.fontWeight + ' ' + (this.mCurrentTextSize + this.TEXT_ADD_SIZE) + 'vp ' + this.fontFamily;
+                this.context.fillText(lyric.words[i].text, wordX, this.lrcY + this.TEXT_ADD_SIZE / 2, this.lrcWidth);
+              } else {
+                this.context.font = this.fontWeight + ' ' + this.mCurrentTextSize + 'vp ' + this.fontFamily;
+                this.context.fillText(lyric.words[i].text, wordX, this.lrcY, this.lrcWidth);
+              }
+              wordX += this.context.measureText(lyric.words[i].text).width;
+            }
+          } else {
+            this.context.textAlign = 'center';
+            this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+          }
+          break;
+        case LyricScrollEffect.LetterGradient:
+          if (lyric.words && lyric.words.length > 0) {
+            this.context.textAlign = 'center';
+            let startX_g = this.lrcX - textMetrics.width / 2;
+            let endX_g = startX_g + textMetrics.width;
+            let gradY_g = this.lrcY - textMetrics.height / 2;
+
+            let progress = 0;
+            let findPlayingWord = false;
+            if (lyric.words && lyric.words.length > 0) {
+              for (let i = 0; i < lyric.words.length; i++) {
+                let wordStartTime = lyric.lineStartTime + lyric.words[i].wordStartTime;
+                let wordEndTime = lyric.lineStartTime + lyric.words[i].wordStartTime + lyric.words[i].duration;
+                if (wordStartTime <= this.lyricMilliSecondsTime && wordEndTime >= this.lyricMilliSecondsTime) {
+                  let wordProgress =
+                    (this.lyricMilliSecondsTime - wordStartTime) / lyric.words[i].duration / lyric.words.length;
+                  let wordPassedProgress = i / lyric.words.length;
+                  progress = wordPassedProgress + wordProgress;
+                  findPlayingWord = true;
+                  break;
+                }
+              }
+            }
+            if (!findPlayingWord) {
+              if (this.lyricMilliSecondsTime < lyric.lineStartTime) {
+                progress = 0;
+              } else if (this.lyricMilliSecondsTime >= lyric.lineStartTime + lyric.lineDuration) {
+                progress = GRADIENT_PROGRESS_MAX;
+              } else {
+                LogUtil.error('This should not be happening.');
+              }
+            }
+
+            this.context.fillStyle = this.progressGrad(startX_g, gradY_g, endX_g, gradY_g, progress);
+            this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+          } else {
+            this.context.textAlign = 'center'
+            this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+          }
+          break;
+        case LyricScrollEffect.LetterStar:
+          if (lyric.words && lyric.words.length > 0) {
+            let textStartX = this.lrcX - textMetrics.width / 2;
+            let textEndX = textStartX + textMetrics.width;
+            let gradY_Star = this.lrcY - textMetrics.height / 2;
+
+            let wordXX = textStartX;
+            let starX = textStartX;
+            let starRotate = 0;
+            this.context.textAlign = 'start';
+            let findPlayingWordStar = false;
+            if (lyric.words && lyric.words.length > 0) {
+              for (let i = 0; i < lyric.words.length; i++) {
+                let wordStartTime = lyric.lineStartTime + lyric.words[i].wordStartTime;
+                let wordEndTime = lyric.lineStartTime + lyric.words[i].wordStartTime + lyric.words[i].duration;
+                if (wordStartTime <= this.lyricMilliSecondsTime && wordEndTime >= this.lyricMilliSecondsTime) {
+                  let wordProgress =
+                    (this.lyricMilliSecondsTime - wordStartTime) / lyric.words[i].duration / lyric.words.length;
+                  let wordPassedProgress = i / lyric.words.length;
+                  let progress = wordPassedProgress + wordProgress;
+                  this.context.fillStyle = this.progressGrad(textStartX, gradY_Star, textEndX, gradY_Star, progress);
+                  this.context.font = this.fontWeight + ' ' + this.mCurrentTextSize + 'vp ' + this.fontFamily;
+                  this.context.fillText(lyric.words[i].text, wordXX, this.lrcY, this.lrcWidth);
+                  findPlayingWordStar = true;
+                  starX = wordXX + this.context.measureText(lyric.words[i].text).width / 2;
+                } else {
+                  this.context.font = this.fontWeight + ' ' + this.mCurrentTextSize + 'vp ' + this.fontFamily;
+                  this.context.fillText(lyric.words[i].text, wordXX, this.lrcY, this.lrcWidth);
+                }
+                wordXX += this.context.measureText(lyric.words[i].text).width;
+              }
+            }
+
+            if (!findPlayingWordStar) {
+              if (this.lyricMilliSecondsTime < lyric.lineStartTime) {
+                starX = textStartX;
+              } else if (this.lyricMilliSecondsTime > lyric.lineStartTime + lyric.lineDuration) {
+                starX = this.lrcX + textMetrics.width / 2 -
+                  this.context.measureText(lyric.words[lyric.words.length-1].text).width / 2;
+              } else {
+                LogUtil.error('This should not be happening.');
+              }
+              let starY = this.lrcY - textMetrics.height;
+              this.drawStars(starX, starY, this.mDividerHeight / 2, this.mDividerHeight / 4, 0);
+            } else {
+              let starY = this.lrcY - textMetrics.height;
+              this.drawStars(starX, starY, this.mDividerHeight / 2, this.mDividerHeight / 4, starRotate);
+            }
+          } else {
+            this.context.textAlign = 'center';
+            this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+          }
+          break;
+        default:
+          this.context.textAlign = 'start';
+          this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+          break;
+      }
+    } else {
+      this.context.textAlign = 'start';
+      this.context.fillText(text, this.lrcX, this.lrcY, this.lrcWidth);
+    }
+    return textMetrics.height;
+  }
+
+  /**
+   * 绘制每一行歌词并返回每行的高度。
+   * @param lyric
+   * @param isCurrent
+   * @returns
+   */
+  private drawLyricLine(lyric: LrcEntry, isCurrent: boolean): number {
+    let lineHeight = 0;
+    if (isCurrent) {
+      this.context.font = this.fontWeight + ' ' + this.mCurrentTextSize + 'vp ' + this.fontFamily;
+      this.context.fillStyle = this.mCurrentTextColor;
+    } else {
+      this.context.font = this.fontWeight + ' ' + this.mNormalTextSize + 'vp ' + this.fontFamily;
+      this.context.fillStyle = this.mNormalTextColor;
+    }
+    this.context.textBaseline = 'bottom';
+    let textMetrics: TextMetrics = this.context.measureText(lyric.lineWords);
+    if (textMetrics.width > this.lrcWidth) {
+      lineHeight = this.drawMultipleLine(lyric, textMetrics, isCurrent);
+    } else {
+      lineHeight = this.drawSingleLine(lyric, textMetrics, isCurrent);
+    }
+    return lineHeight;
+  }
+
+  /**
+   * Calculate the maximum and minimum offsets of the lyrics.
+   * PS: You need to draw all the lyrics before calculating,
+   * because the offset depends on the total height of the lyrics.
+   */
+  private calculateOffset() {
+    this.canvasMinOffsetY = 0;
+    switch (this.lyricTopPosition) {
+      case LyricTopPosition.Middle:
+        this.canvasMaxOffsetY = this.lrcY - this.paddingTop - this.lrcHeight / 2;
+        break;
+      case LyricTopPosition.Top:
+        this.canvasMaxOffsetY = this.lrcY - this.paddingTop;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Offset position of the target object.
+   *
+   * @param desOffsetY
+   */
+  private drawContent(desOffsetY: number, change?: boolean) {
+    this.context.clearRect(0, 0, this.viewWidth, this.lrcY + this.viewHeight);
+    this.reset();
+
+    this.context.globalCompositeOperation = 'source-over';
+    this.lrcY = this.initFirstLineY + desOffsetY;
+    this.curCanvasOffsetY = desOffsetY;
+
+    if (this.mLrcEntryList && this.mLrcEntryList.length > 0) {
+      let index = 0;
+      for (let mLrcEntryListElement of this.mLrcEntryList) {
+        let isCurrentLine = this.mCurrentLine === index ? true : false;
+        this.drawLyricLine(mLrcEntryListElement, isCurrentLine);
+        index++;
+      }
+    } else {
+      this.drawLyricLine(EMPTY_LYRIC, true);
+    }
+
+    this.updateLyricArea(this.paddingLeft, this.paddingTop, this.viewWidth - this.paddingRight,
+      this.viewHeight - this.paddingBottom);
+
+    if (this.mLrcEntryList && this.mLrcEntryList.length > 0) {
+      this.context.globalCompositeOperation = 'source-in';
+      let grad = this.context.createLinearGradient(0, 0, 0, this.viewHeight);
+      grad.addColorStop(0.0, '#00ffffff');
+      grad.addColorStop(0.15, '#ffffffff');
+      grad.addColorStop(0.3, '#ffffffff');
+      grad.addColorStop(0.7, '#4dffffff');
+      grad.addColorStop(1.0, '#00ffffff');
+      this.context.fillStyle = grad;
+      this.context.fillRect(0, 0, this.viewWidth, this.viewHeight);
+    }
+  }
+
+  /**
+   * Area where the lyrics are updated.
+   * @param left
+   * @param top
+   * @param right
+   * @param bottom
+   */
+  private updateLyricArea(left: number, top: number, right: number, bottom: number) {
+    this.lyricRectangle = new Rectangle(left, top, right, bottom);
+  }
+
+  /**
+   * Whether the location is in the song area.
+   * @param x
+   * @param y
+   * @returns
+   */
+  private isTouchLyricArea(x: number, y: number): boolean {
+    return this.lyricRectangle && this.lyricRectangle.isIn(x, y);
+  }
+
+  hasLrc(): boolean {
+    return this.mLrcEntryList && this.mLrcEntryList.length > 0;
+  }
+
+  /**
+   * How far to offset to a particular line.
+   * @param line
+   * @returns
+   */
+  getOffset(line: number): number {
+    let offsetY = 0;
+    switch (this.lyricTopPosition) {
+      case LyricTopPosition.Top:
+        for (let i = 0; i <= line && i < this.mLrcEntryList.length; i++) {
+          if (i === line) {
+            offsetY += this.getLineHeight(this.mLrcEntryList[i].lineWords, true) / 2
+              - this.getLineHeight(this.mLrcEntryList[i].lineWords, false) / 2;
+          } else {
+            offsetY += this.getLineHeight(this.mLrcEntryList[i].lineWords, false) + this.mDividerHeight;
+          }
+        }
+        break;
+      case LyricTopPosition.Middle:
+        for (let i = 0; i <= line && i < this.mLrcEntryList.length; i++) {
+          if (i === line) {
+            offsetY += this.getLineHeight(this.mLrcEntryList[i].lineWords, true) / 2 + this.mDividerHeight;
+          } else {
+            offsetY += this.getLineHeight(this.mLrcEntryList[i].lineWords, false) + this.mDividerHeight;
+          }
+        }
+        break;
+      default:
+        break;
+    }
+    return offsetY;
+  }
+
+  /**
+   * Animated scroll to specified position.
+   * @param line
+   */
+  smoothScrollTo(line: number) {
+    let offset = this.getOffset(line);
+    LogUtil.info('[smoothScrollTo] line:' + line + ',offset:' + offset);
+    this.startAnimator(offset);
+  }
+
+  /**
+   * The lyrics have changed.
+   */
+  onLyricUpdated() {
+    this.mCurrentLine = NONE_LINE;
+    this.onTimeUpdated();
+  }
+
+  /**
+   * The lyric time is updated. The lyrics need to be scrolled to the specified position.
+   */
+  onTimeUpdated() {
+    if (!this.hasLrc()) {
+      this.drawContent(0);
+      return;
+    }
+    let line = this.findShowLine(this.lyricMilliSecondsTime);
+    if (line !== this.mCurrentLine) {
+      this.mCurrentLine = line;
+      this.smoothScrollTo(line);
+    } else {
+      this.drawContent(this.curCanvasOffsetY);
+    }
+  }
+
+  /**
+   * Return the row corresponding to the current time.
+   * @param milliSeconds
+   * @returns
+   */
+  findShowLine(milliSeconds: number): number {
+    if (this.mLrcEntryList && this.mLrcEntryList.length > 0) {
+      for (let index = 0; index < this.mLrcEntryList.length; index++) {
+        if (this.mLrcEntryList[index].lineStartTime <= milliSeconds
+          && this.mLrcEntryList[index].lineStartTime + this.mLrcEntryList[index].lineDuration >= milliSeconds) {
+          return index;
+        }
+      }
+    }
+    return this.mCurrentLine;
+  }
+
+  build() {
+    Canvas(this.context)
+      .onAreaChange((oldArea: Area, newArea: Area) => {
+        this.viewWidth = Number.parseFloat(newArea.width.toLocaleString());
+        this.viewHeight = Number.parseFloat(newArea.height.toLocaleString());
+        if (oldArea.width.toLocaleString() !== newArea.width.toLocaleString()) {
+          this.calculate();
+          let line = this.findShowLine(this.lyricMilliSecondsTime);
+          let offset = this.getOffset(line);
+          this.drawContent(offset);
+        }
+        if (oldArea.height.toLocaleString() !== newArea.height.toLocaleString()) {
+          this.calculate();
+          let line = this.findShowLine(this.lyricMilliSecondsTime);
+          let offset = this.getOffset(line);
+          this.drawContent(-offset, true);
+        }
+      })
   }
 }
