@@ -1,5 +1,5 @@
 import { WorkTrack, WorkTracks } from '../net/WorkTrack'
-import { Files } from './Files'
+import { Files } from './FilesNew'
 
 @CustomDialog
 export struct WorkTrackDialog {
@@ -8,7 +8,7 @@ export struct WorkTrackDialog {
   @Link selectWorkTrack:WorkTrack|null
   build() {
     Column() {
-      Files({showList:this.showList,selectWorkTrack:$selectWorkTrack})
+      Files({showList:this.showList,stackList:Array.of(this.showList as WorkTracks)})
     }
   }
 }

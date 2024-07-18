@@ -6,6 +6,7 @@ import { display, mediaquery, router } from '@kit.ArkUI'
 import { MEDIA_SERVICE } from '../constant/AppStorageConstant'
 import { MediaService } from '../service/MediaService'
 import { LogUtil } from '../util/LogUtil'
+import { BusinessError } from '@kit.BasicServicesKit'
 
 @Entry
 @Component
@@ -68,8 +69,8 @@ struct AsmrWork {
         const more = works.works as WorkInfo[]
         this.list.push(...more)
       }
-    }).catch(()=>{
-      console.error('An error occurred')
+    }).catch((e:BusinessError)=>{
+      console.error('An error occurred',e)
     })
   }
 
