@@ -32,6 +32,8 @@ export const PLAY_MEDIA_DATA:string ='playMediaData'
  * */
 export const WORK_TRACKS:string = 'WorkTracks'
 
+export const LYRICS:string = 'lyrics'
+
 export type PlayerMode = 'order' | 'random' | 'single'
 
 

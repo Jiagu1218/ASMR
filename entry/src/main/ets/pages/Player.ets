@@ -30,7 +30,7 @@ struct Player {
   @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
 
   @State lyrics:WebVtt = []
-  @State lyricIndex:number = 0
+  @State @Watch('lyricIndexChange') lyricIndex:number = -1
   @State lyricsArray:LrcEntry[] = []
   @StorageLink(DURATION) duration:number = 0
   @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
@@ -51,6 +51,11 @@ struct Player {
   dialogController: CustomDialogController = new CustomDialogController({
     builder:WorkTrackDialog({showList:this.workTracks,selectWorkTrack:$workTrack})
   })
+
+  lyricIndexChange(){
+    const lyrics = this.lyrics[this.lyricIndex]
+    LogUtil.info(JSON.stringify(lyrics))
+  }
 
   workTrackChange(){
     if (this.workTrack){
@@ -75,7 +80,7 @@ struct Player {
   }
   onTimeUpdate(){
     const currentTime = this.currentTime
-    this.lyricIndex = this.lyrics.findIndex(vtt=>vtt.startTime>=currentTime && vtt.endTime<currentTime)
+    this.lyricIndex = this.lyrics.findIndex(vtt=>vtt.startTime<=currentTime && vtt.endTime>currentTime)
   }
 
   aboutToAppear(): void {
@@ -253,11 +258,11 @@ struct Player {
       .height(48).width('100%')
       Column(){
         Row(){
-          Progress({value: this.currentTime, total:this.mediaData.duration*1000,type:ProgressType.Linear})
+          Progress({value: this.currentTime, total:this.duration,type:ProgressType.Linear})
         }.width('100%')
         Row(){
           Text(`${parseMillisecondDuration(this.currentTime)}`)
-          Text(`${parseSecondDuration(this.mediaData.duration)}`)
+          Text(`${parseMillisecondDuration(this.duration)}`)
         }.justifyContent(FlexAlign.SpaceBetween).width('100%')
       }.width('100%').height(48)
       Row(){
