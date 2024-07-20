@@ -1,18 +1,20 @@
-import { media } from '@kit.MediaKit'
+import { media } from '@kit.MediaKit';
 import { avSession as AVSessionManager } from '@kit.AVSessionKit';
-import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit'
-import { LogUtil } from '../util/LogUtil'
-import { audio } from '@kit.AudioKit'
-import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
-  PlayerMode,
+import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit';
+import { LogUtil } from '../util/LogUtil';
+import { audio } from '@kit.AudioKit';
+import {
+  CURRENT_TIME,
+  DURATION,
+  MEDIA_SERVICE,
   PLAY_MEDIA_DATA,
   PLAY_MODE,
-  PLAY_STATE } from '../constant/AppStorageConstant'
-import  MediaData  from '../entity/MediaData'
-import { setAVMataData, setAVPlaybackState,
-  setAVPlaybackStatePosition} from '../util/AVSessionUtil';
-import { startBackGroundTask } from '../util/BackGroundTaskUtil';
-import { common, wantAgent } from '@kit.AbilityKit';
+  PLAY_STATE,
+  PlayerMode
+} from '../constant/AppStorageConstant';
+import MediaData from '../entity/MediaData';
+import { createAVSession, setAVMataData, setAVPlaybackState, setAVPlaybackStatePosition } from '../util/AVSessionUtil';
+import { common } from '@kit.AbilityKit';
 
 
 export class MediaService {
@@ -217,35 +219,14 @@ export class MediaService {
     }
   }
 
-  createAVSession(context: common.UIAbilityContext){
-    AVSessionManager.createAVSession(context, 'ASMR_AUDIO_SESSION', 'audio').then(avSession=>{
+  createSession(context: common.UIAbilityContext){
+    createAVSession(context).then(avSession=>{
+      avSession.on('play', ()=>{this.playMedia()});
+      avSession.on('pause',()=>{this.playMedia()});
+      avSession.on('playNext',()=>{this.playNext()});
+      avSession.on('playPrevious', ()=>{this.playPrev()});
+      avSession.on('seek',(time: number)=>{this.avPlayer?.seek(time)})
       this.avSession = avSession
-      this.avSession?.activate().then(()=>{
-        LogUtil.info(`媒体会话激活`)
-      }).catch((e:BusinessError)=>{
-        LogUtil.error(`媒体会话激活失败${e.message}`,e)
-      })
-      let wantAgentInfo: wantAgent.WantAgentInfo = {
-        wants: [
-          {
-            bundleName: context.abilityInfo.bundleName,
-            abilityName: context.abilityInfo.name
-          }
-        ],
-        operationType: wantAgent.OperationType.START_ABILITIES,
-        requestCode: 0,
-        wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
-      }
-      wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
-        avSession.setLaunchAbility(agent).catch((e:BusinessError)=>{
-          LogUtil.error(`媒体会话setLaunchAbility失败${e.message}`,e)
-        })
-      })
-      this.avSession.on('play', ()=>{this.playMedia()});
-      this.avSession.on('pause',()=>{this.playMedia()});
-      this.avSession.on('playNext',()=>{this.playNext()});
-      this.avSession.on('playPrevious', ()=>{this.playPrev()});
-      this.avSession.on('seek',(time: number)=>{this.avPlayer?.seek(time)})
     }).catch((e:BusinessError)=>{
       LogUtil.error(`创建媒体会话avSession失败：${e.message}`,e)
     })
@@ -256,7 +237,7 @@ export class MediaService {
     media.createAVPlayer().then(avPlayer => {
       this.avPlayer = avPlayer
       this.setCallback()
-      this.createAVSession(context)
+      this.createSession(context)
       this.playerState = avPlayer.state
     }).catch((err: BusinessError) => {
       LogUtil.error('创建avPlayer失败：%{public}s', err.message, err)

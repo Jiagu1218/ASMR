@@ -3,9 +3,31 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import MediaData from '../entity/MediaData';
 import { LogUtil } from './LogUtil';
 import { media } from '@kit.MediaKit';
+import { common, wantAgent } from '@kit.AbilityKit';
 
-export async function createAVSession(context: Context):Promise<avSession.AVSession>{
-  return avSession.createAVSession(context, 'ASMR_AUDIO_SESSION', 'audio');
+export async function createAVSession(context: common.UIAbilityContext):Promise<avSession.AVSession>{
+  return avSession.createAVSession(context, 'ASMR_AUDIO_SESSION', 'audio').then(session=>{
+    session?.activate().then(()=>{
+      LogUtil.info(`媒体会话激活`)
+    })
+    let wantAgentInfo: wantAgent.WantAgentInfo = {
+      wants: [
+        {
+          bundleName: context.abilityInfo.bundleName,
+          abilityName: context.abilityInfo.name
+        }
+      ],
+      operationType: wantAgent.OperationType.START_ABILITIES,
+      requestCode: 0,
+      wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+    }
+    wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
+      session.setLaunchAbility(agent).catch((e:BusinessError)=>{
+        LogUtil.error(`媒体会话setLaunchAbility失败${e.message}`,e)
+      })
+    })
+    return session
+  })
 }
 
 export function coverToMetaData(mediaData:MediaData):avSession.AVMetadata{
