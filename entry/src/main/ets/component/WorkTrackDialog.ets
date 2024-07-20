@@ -8,7 +8,7 @@ export struct WorkTrackDialog {
   @Link selectWorkTrack:WorkTrack|null
   build() {
     Column() {
-      Files({showList:this.showList,stackList:Array.of(this.showList as WorkTracks)})
+      Files({stackList:[this.showList as WorkTracks],selectedWorkTrack:$selectWorkTrack})
     }
   }
 }

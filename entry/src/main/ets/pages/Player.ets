@@ -2,7 +2,12 @@ import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
 import MediaData from '../entity/MediaData';
-import { CURRENT_TIME, DURATION, MEDIA_SERVICE, PLAY_MEDIA_DATA, WORK_TRACKS } from '../constant/AppStorageConstant';
+import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
+  PlayerMode,
+  PLAY_MEDIA_DATA,
+  PLAY_MODE,
+  PLAY_STATE,
+  WORK_TRACKS } from '../constant/AppStorageConstant';
 import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
@@ -12,6 +17,7 @@ import { WorkTrack, WorkTracks } from '../net/WorkTrack';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { LogUtil } from '../util/LogUtil';
 import { WorkTrackDialog } from '../component/WorkTrackDialog';
+import { media } from '@kit.MediaKit';
 
 @Preview
 @Entry
@@ -28,9 +34,11 @@ struct Player {
   lgListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
 
   @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
-
+  @StorageLink(PLAY_STATE) playerState:media.AVPlayerState = 'idle'
+  @StorageLink(PLAY_MODE) @Watch('modeChange') playerMode:PlayerMode = 'order'
   @State lyrics:WebVtt = []
   @State @Watch('lyricIndexChange') lyricIndex:number = -1
+  @State modeIcon:Resource = $r('sys.symbol.order_play')
   @State lyricsArray:LrcEntry[] = []
   @StorageLink(DURATION) duration:number = 0
   @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
@@ -57,12 +65,37 @@ struct Player {
     LogUtil.info(JSON.stringify(lyrics))
   }
 
+  modeChange() {
+    switch (this.playerMode){
+      case 'single':this.modeIcon = $r('sys.symbol.repeat_1')
+        break
+      case 'order':this.modeIcon = $r('sys.symbol.order_play')
+        break
+      case 'random':this.modeIcon = $r('sys.symbol.shuffle')
+        break
+    }
+  }
+
   workTrackChange(){
     if (this.workTrack){
       switch (this.workTrack.type){
         case 'audio':
-          this.mediaData.mediaUrl = (this.workTrack.mediaStreamUrl || this.workTrack.streamLowQualityUrl) as string
-          this.mediaService.playMedia(this.mediaData)
+          if(this.playerState == 'playing'){
+            const title = this.workTrack.title
+            const mediaData:MediaData = {
+              id:this.mediaData.id,
+              title:title.slice(0,title.lastIndexOf('.')),
+              imageUrl:this.mediaData.imageUrl,
+              singer:this.mediaData.singer,
+              source:this.mediaData.source,
+              duration:this.mediaData.duration,
+              mediaUrl:(this.workTrack.mediaStreamUrl || this.workTrack.streamLowQualityUrl) as string
+            }
+            this.mediaService.addPlayData(mediaData)
+          }else{
+            this.mediaData.mediaUrl = (this.workTrack.mediaStreamUrl || this.workTrack.streamLowQualityUrl) as string
+            this.mediaService.playMedia(this.mediaData)
+          }
           break
         case 'text':
           const title = this.workTrack.title
@@ -248,7 +281,10 @@ struct Player {
   @Builder opArea(){
     Column(){
       Row(){
-        SymbolGlyph($r('sys.symbol.repeat')).fontSize(32)
+        SymbolGlyph(this.modeIcon).fontSize(32)
+          .onClick(()=>{
+            this.mediaService.changeMode()
+          })
         SymbolGlyph($r('sys.symbol.arrowshape_down_to_line_fill')).fontSize(32)
         SymbolGlyph($r('sys.symbol.speaker_wave_3')).fontSize(32)
         SymbolGlyph($r('sys.symbol.dot_grid_2x2')).fontSize(32).onClick(()=>{
@@ -267,8 +303,21 @@ struct Player {
       }.width('100%').height(48)
       Row(){
         SymbolGlyph($r('sys.symbol.backward_end_fill')).fontSize(40)
-        SymbolGlyph($r('sys.symbol.pause_round_triangle_fill')).fontSize(56)
+          .onClick(()=>{
+            this.mediaService.playPrev()
+          })
+        SymbolGlyph(this.playerState == 'playing'?$r('sys.symbol.pause_round_triangle_fill'):$r('sys.symbol.play_circle_fill')).fontSize(56)
+          .onClick(()=>{
+            if(this.mediaData.mediaUrl?.length>0){
+              this.mediaService.playMedia()
+            }else{
+              this.menu()
+            }
+          })
         SymbolGlyph($r('sys.symbol.forward_end_fill')).fontSize(40)
+          .onClick(()=>{
+            this.mediaService.playNext()
+          })
       }.justifyContent(FlexAlign.SpaceAround).width('100%')
     }.justifyContent(FlexAlign.End)
     .width('100%')
@@ -292,4 +341,5 @@ struct Player {
   @Builder otherArea() {
 
   }
+
 }

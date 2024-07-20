@@ -7,7 +7,7 @@ import { WorkTrack, WorkTracks } from '../net/WorkTrack'
 @Preview
 @Component
 export struct Files{
-  @Require @Prop showList:WorkTracks = [
+  showList:WorkTracks = [
     {
       "type": "folder",
       "title": "01 通常版",
@@ -223,81 +223,10 @@ export struct Files{
           "size": 48838561
         }
       ]
-    },
-    {
-      "type": "image",
-      "hash": "1204312/1076651",
-      "title": "Artwork01.jpg",
-      "work": {
-        "id": 1204312,
-        "source_id": "RJ01204312",
-        "source_type": "DLSITE"
-      },
-      "workTitle": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-      "mediaStreamUrl": "https://raw.kiko-play-niptan.one/media/stream/daily/2024-06-29/RJ01204312/Artwork01.jpg",
-      "mediaDownloadUrl": "https://raw.kiko-play-niptan.one/media/download/daily/2024-06-29/RJ01204312/Artwork01.jpg",
-      "size": 1161323
-    },
-    {
-      "type": "image",
-      "hash": "1204312/1076652",
-      "title": "Artwork02.jpg",
-      "work": {
-        "id": 1204312,
-        "source_id": "RJ01204312",
-        "source_type": "DLSITE"
-      },
-      "workTitle": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-      "mediaStreamUrl": "https://raw.kiko-play-niptan.one/media/stream/daily/2024-06-29/RJ01204312/Artwork02.jpg",
-      "mediaDownloadUrl": "https://raw.kiko-play-niptan.one/media/download/daily/2024-06-29/RJ01204312/Artwork02.jpg",
-      "size": 888794
-    },
-    {
-      "type": "image",
-      "hash": "1204312/1076653",
-      "title": "Artwork03.jpg",
-      "work": {
-        "id": 1204312,
-        "source_id": "RJ01204312",
-        "source_type": "DLSITE"
-      },
-      "workTitle": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-      "mediaStreamUrl": "https://raw.kiko-play-niptan.one/media/stream/daily/2024-06-29/RJ01204312/Artwork03.jpg",
-      "mediaDownloadUrl": "https://raw.kiko-play-niptan.one/media/download/daily/2024-06-29/RJ01204312/Artwork03.jpg",
-      "size": 698130
-    },
-    {
-      "type": "image",
-      "hash": "1204312/1076654",
-      "title": "ロゴ無しイラスト.jpg",
-      "work": {
-        "id": 1204312,
-        "source_id": "RJ01204312",
-        "source_type": "DLSITE"
-      },
-      "workTitle": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-      "mediaStreamUrl": "https://raw.kiko-play-niptan.one/media/stream/daily/2024-06-29/RJ01204312/%E3%83%AD%E3%82%B4%E7%84%A1%E3%81%97%E3%82%A4%E3%83%A9%E3%82%B9%E3%83%88.jpg",
-      "mediaDownloadUrl": "https://raw.kiko-play-niptan.one/media/download/daily/2024-06-29/RJ01204312/%E3%83%AD%E3%82%B4%E7%84%A1%E3%81%97%E3%82%A4%E3%83%A9%E3%82%B9%E3%83%88.jpg",
-      "size": 1628627
-    },
-    {
-      "type": "text",
-      "hash": "1204312/1076655",
-      "title": "説明書.txt",
-      "work": {
-        "id": 1204312,
-        "source_id": "RJ01204312",
-        "source_type": "DLSITE"
-      },
-      "workTitle": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-      "mediaStreamUrl": "https://api.asmr-200.com/api/media/stream/1204312/1076655",
-      "mediaDownloadUrl": "https://raw.kiko-play-niptan.one/media/download/daily/2024-06-29/RJ01204312/%E8%AA%AC%E6%98%8E%E6%9B%B8.txt",
-      "size": 2499
     }
   ]
-  @State selectIndex:number = -1
-
-  @Require @Prop stackList:Array<WorkTracks> = []
+  @Link selectedWorkTrack:WorkTrack
+  @Require @State stackList:Array<WorkTracks> = []
   //显示层级
   @State level:number = 0
   aboutToAppear(): void {
@@ -319,7 +248,7 @@ export struct Files{
                 if (workTracks.item.type ==='folder') {
                   this.Folder(workTracks.item)
                 }else{
-                  this.File(workTracks.item,workTracks.index||0)
+                  this.File(workTracks.item)
                 }
               }.swipeAction({
                 end:this.download()
@@ -331,7 +260,7 @@ export struct Files{
             startMargin: 48,
             endMargin: 8
           })
-          .backgroundColor(Color.Gray)
+          .backgroundColor(Color.White)
           .sticky(StickyStyle.Header)
           .width('100%')
           .height('100%')
@@ -389,7 +318,7 @@ export struct Files{
       }
     })
   }
-  @Builder File(track:WorkTrack,index:number){
+  @Builder File(track:WorkTrack){
     Row(){
       Stack(){
         Row({space:16}){
@@ -410,6 +339,9 @@ export struct Files{
               overflow: TextOverflow.Ellipsis
             })
         }.width('100%')
+        .onClick(()=>{
+          this.selectedWorkTrack = track
+        })
       }.layoutWeight(1)
       .height(48)
     }
@@ -422,7 +354,7 @@ export struct Files{
   }
 
   @Builder download(){
-    Button('下载').type(ButtonType.Circle)
+    SymbolGlyph($r('sys.symbol.download'))
       .onClick(()=>{
         console.log('下载')
       })

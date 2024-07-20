@@ -34,6 +34,12 @@ export const WORK_TRACKS:string = 'WorkTracks'
 
 export const LYRICS:string = 'lyrics'
 
+/**
+ * 播放模式
+ * order：顺序
+ * random：随机
+ * single：单曲
+ * */
 export type PlayerMode = 'order' | 'random' | 'single'
 
 

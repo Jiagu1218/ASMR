@@ -15,7 +15,7 @@ import  MediaData  from '../entity/MediaData'
 export class MediaService {
   private static instance?: MediaService
   private avPlayer?: media.AVPlayer
-  private playerMode: PlayerMode = 'single'
+  private playerMode: PlayerMode = 'order'
   private playerState: media.AVPlayerState = 'idle'
   private playerList: MediaData[] = []
   private playerIndex: number = 0
@@ -40,11 +40,10 @@ export class MediaService {
   private onStateChange: (state: media.AVPlayerState, reason: media.StateChangeReason) => void =
     (state: media.AVPlayerState, reason: media.StateChangeReason) => {
       this.playerState = state
-      AppStorage.setOrCreate<string>(PLAY_STATE, state)
+      AppStorage.setOrCreate<media.AVPlayerState>(PLAY_STATE, state)
       switch(state) {
         case 'idle': // 成功调用reset接口后触发该状态机上报
           LogUtil.info('AVPlayer state idle called.');
-          this.avPlayer?.release(); // 调用release接口销毁实例对象
           break;
         case 'initialized': // avplayer 设置播放源后触发该状态上报
           LogUtil.info('AVPlayer state initialized called.');
@@ -130,6 +129,13 @@ export class MediaService {
   clearPlayList(){
     this.playerList.length = 0
   }
+
+  /**
+   * 媒体在列表中的位置
+   * */
+  private mediaDataIndex(media:MediaData):number{
+    return this.playerList.findIndex(mediaData=>media.id == mediaData.id && media.source == mediaData.source && media.mediaUrl == mediaData.mediaUrl)
+  }
   
   playMedia(media?:MediaData){
     if(media){
@@ -141,28 +147,43 @@ export class MediaService {
     if (this.avPlayer?.state == 'idle' && media && media.mediaUrl?.trim().length>0) {
       this.avPlayer.url = media.mediaUrl
     }
-    if (this.avPlayer?.state != 'idle') {
+    if (this.avPlayer?.state == 'playing'){
+      this.avPlayer?.pause()
+    } else if (this.avPlayer?.state != 'idle') {
       this.avPlayer?.play()
     }
   }
 
-  /**
-   * 媒体在列表中的位置
-   * */
-  private mediaDataIndex(media:MediaData):number{
-    return this.playerList.findIndex(mediaData=>media.id == mediaData.id && media.source == mediaData.source)
+  playNext() {
+    if (this.playerList.length <= 0) {
+      return;
+    }
+    if (this.playerList.length > 1 && this.avPlayer?.state != 'idle'){
+      this.avPlayer?.reset()
+    }
+    setTimeout(()=>{
+      this.playerIndex = (this.playerIndex + 1) % this.playerList.length;
+      this.playMedia(this.playerList[this.playerIndex]);
+    },300)
   }
 
-  playNext(){
-
+  playPrev() {
+    if (this.playerList.length <= 0) {
+      return;
+    }
+    if (this.playerList.length > 1 && this.avPlayer?.state != 'idle'){
+      this.avPlayer?.reset()
+    }
+    setTimeout(()=>{
+      this.playerIndex = (this.playerIndex - 1 + this.playerList.length) % this.playerList.length;
+      this.playMedia(this.playerList[this.playerIndex]);
+    },300)
   }
 
-  playPrev(){
-
-  }
 
   changeMode(){
-    if (this.avPlayer) {
+    const state = this.avPlayer?.state
+    if (this.avPlayer && (state === 'prepared' || state === 'playing' || state === 'paused' || state === 'completed')) {
       const modes = ['order','random','single']
       const index = modes.indexOf(this.playerMode) + 1
       const mode = (index>= modes.length? modes[0] : modes[index]) as PlayerMode
