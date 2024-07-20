@@ -2,6 +2,8 @@ import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import dataSourcePool from '../pool/DataSourcePool';
+import { startBackGroundTask, stopBackGroundTask } from '../util/BackGroundTaskUtil';
+
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -42,11 +44,13 @@ export default class EntryAbility extends UIAbility {
 
   onForeground(): void {
     // Ability has brought to foreground
+    stopBackGroundTask(this.context)
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
   }
 
   onBackground(): void {
     // Ability has back to background
+    startBackGroundTask(this.context)
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
   }
 }

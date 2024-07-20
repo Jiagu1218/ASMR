@@ -7,12 +7,13 @@ import { MEDIA_SERVICE } from '../constant/AppStorageConstant'
 import { MediaService } from '../service/MediaService'
 import { LogUtil } from '../util/LogUtil'
 import { BusinessError } from '@kit.BasicServicesKit'
+import { common } from '@kit.AbilityKit'
 
 @Entry
 @Component
 struct AsmrWork {
   pageNum:number = 1
-  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
+  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this)  as common.UIAbilityContext)
   @State useWaterFlows:boolean = true
   displayWidth:number = 720
   @State waterFlowColumnsTemplate:string = '1fr '

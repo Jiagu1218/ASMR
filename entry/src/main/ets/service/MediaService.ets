@@ -1,4 +1,5 @@
 import { media } from '@kit.MediaKit'
+import { avSession as AVSessionManager } from '@kit.AVSessionKit';
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit'
 import { LogUtil } from '../util/LogUtil'
 import { audio } from '@kit.AudioKit'
@@ -8,16 +9,20 @@ import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
   PLAY_MODE,
   PLAY_STATE } from '../constant/AppStorageConstant'
 import  MediaData  from '../entity/MediaData'
-
-
+import { setAVSessionInfo } from '../util/AVSessionUtil';
+import { startBackGroundTask } from '../util/BackGroundTaskUtil';
+import { common } from '@kit.AbilityKit';
 
 
 export class MediaService {
   private static instance?: MediaService
+  private context?: common.UIAbilityContext
   private avPlayer?: media.AVPlayer
+  private avSession?:AVSessionManager.AVSession
   private playerMode: PlayerMode = 'order'
   private playerState: media.AVPlayerState = 'idle'
   private playerList: MediaData[] = []
+  private mediaData?:MediaData
   private playerIndex: number = 0
   private play?: AsyncCallback<void> = () => {
     this.avPlayer?.play()
@@ -41,6 +46,7 @@ export class MediaService {
     (state: media.AVPlayerState, reason: media.StateChangeReason) => {
       this.playerState = state
       AppStorage.setOrCreate<media.AVPlayerState>(PLAY_STATE, state)
+      setAVSessionInfo(this.avSession!,this.mediaData!,state)
       switch(state) {
         case 'idle': // 成功调用reset接口后触发该状态机上报
           LogUtil.info('AVPlayer state idle called.');
@@ -137,15 +143,20 @@ export class MediaService {
     return this.playerList.findIndex(mediaData=>media.id == mediaData.id && media.source == mediaData.source && media.mediaUrl == mediaData.mediaUrl)
   }
   
-  playMedia(media?:MediaData){
+  async playMedia(media?:MediaData){
     if(media){
-      AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+      if(!this.mediaData){
+        this.mediaData = media
+        AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+      }
       if(this.mediaDataIndex(media) == -1){
         this.playerList.push(media)
       }
     }
     if (this.avPlayer?.state == 'idle' && media && media.mediaUrl?.trim().length>0) {
       this.avPlayer.url = media.mediaUrl
+      this.mediaData = media
+      AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
     }
     if (this.avPlayer?.state == 'playing'){
       this.avPlayer?.pause()
@@ -154,7 +165,7 @@ export class MediaService {
     }
   }
 
-  playNext() {
+  async playNext() {
     if (this.playerList.length <= 0) {
       return;
     }
@@ -167,7 +178,7 @@ export class MediaService {
     },300)
   }
 
-  playPrev() {
+  async playPrev() {
     if (this.playerList.length <= 0) {
       return;
     }
@@ -197,23 +208,36 @@ export class MediaService {
     }
   }
 
+  createAVSession(context: common.UIAbilityContext){
+    AVSessionManager.createAVSession(context, 'ASMR_AUDIO_SESSION', 'audio').then(avSession=>{
+      this.avSession = avSession
+      this.avSession?.activate().then(()=>{
+        LogUtil.info(`媒体会话激活`)
+      }).catch((e:BusinessError)=>{
+        LogUtil.error(`媒体会话激活失败${e.message}`,e)
+      })
+    }).catch((e:BusinessError)=>{
+      LogUtil.error(`创建媒体会话avSession失败：${e.message}`,e)
+    })
+  }
 
-
-
-  private constructor() {
+  private constructor(context: common.UIAbilityContext) {
+    this.context = context
     media.createAVPlayer().then(avPlayer => {
       this.avPlayer = avPlayer
       this.setCallback()
+      this.createAVSession(context)
       this.playerState = avPlayer.state
     }).catch((err: BusinessError) => {
       LogUtil.error('创建avPlayer失败：%{public}s', err.message, err)
     })
+
   }
 
 
-  static build(): MediaService {
+  static build(context: common.UIAbilityContext): MediaService {
     if (!MediaService.instance) {
-      MediaService.instance = new MediaService();
+      MediaService.instance = new MediaService(context);
       AppStorage.setOrCreate<MediaService>(MEDIA_SERVICE, MediaService.instance)
     }
     return MediaService.instance

@@ -18,6 +18,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { LogUtil } from '../util/LogUtil';
 import { WorkTrackDialog } from '../component/WorkTrackDialog';
 import { media } from '@kit.MediaKit';
+import { startBackGroundTask } from '../util/BackGroundTaskUtil';
+import { common } from '@kit.AbilityKit';
 
 @Preview
 @Entry
@@ -33,7 +35,7 @@ struct Player {
   mdListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
   lgListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
 
-  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build()
+  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this) as common.UIAbilityContext)
   @StorageLink(PLAY_STATE) playerState:media.AVPlayerState = 'idle'
   @StorageLink(PLAY_MODE) @Watch('modeChange') playerMode:PlayerMode = 'order'
   @State lyrics:WebVtt = []
@@ -147,7 +149,10 @@ struct Player {
     this.smListener.off('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.smLine(mediaQueryResult) })
     this.mdListener.off('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.mdLine(mediaQueryResult) })
     this.lgListener.off('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.lgLine(mediaQueryResult)})
+
   }
+
+
 
   smLine(mediaQueryResult: mediaquery.MediaQueryResult) {
     if (mediaQueryResult.matches) {
