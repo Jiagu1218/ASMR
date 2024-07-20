@@ -9,9 +9,10 @@ import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
   PLAY_MODE,
   PLAY_STATE } from '../constant/AppStorageConstant'
 import  MediaData  from '../entity/MediaData'
-import { setAVSessionInfo } from '../util/AVSessionUtil';
+import { setAVMataData, setAVPlaybackState,
+  setAVPlaybackStatePosition} from '../util/AVSessionUtil';
 import { startBackGroundTask } from '../util/BackGroundTaskUtil';
-import { common } from '@kit.AbilityKit';
+import { common, wantAgent } from '@kit.AbilityKit';
 
 
 export class MediaService {
@@ -46,7 +47,7 @@ export class MediaService {
     (state: media.AVPlayerState, reason: media.StateChangeReason) => {
       this.playerState = state
       AppStorage.setOrCreate<media.AVPlayerState>(PLAY_STATE, state)
-      setAVSessionInfo(this.avSession!,this.mediaData!,state)
+      setAVPlaybackState(this.avSession!,state)
       switch(state) {
         case 'idle': // 成功调用reset接口后触发该状态机上报
           LogUtil.info('AVPlayer state idle called.');
@@ -57,7 +58,9 @@ export class MediaService {
           break;
         case 'prepared': // prepare调用成功后上报该状态机
           LogUtil.info('AVPlayer state prepared called.');
+          setAVMataData(this.avSession!,this.mediaData!)
           this.avPlayer?.play(); // 调用播放接口开始播放
+          setAVPlaybackStatePosition(this.avSession!,0)
           break;
         case 'playing': // play成功调用后触发该状态机上报
           break;
@@ -86,6 +89,8 @@ export class MediaService {
   }
 
   private onDurationUpdate: (time: number) => void = (time: number) => {
+    this.mediaData!.duration = time
+    setAVMataData(this.avSession!,this.mediaData!)
     AppStorage.setOrCreate<number>(DURATION, time)
   }
 
@@ -95,7 +100,9 @@ export class MediaService {
 
   private offTimeUpdate?: () => void
   private offStateChange?: () => void
-  private onSeekDone?: (seekDoneTime: number) => void
+  private onSeekDone: (seekDoneTime: number) => void = (seekDoneTime: number)=>{
+    setAVPlaybackStatePosition(this.avSession!,seekDoneTime)
+  }
   private offSeekDone?: () => void
   private offDurationUpdate?: () => void
   private onAudioInterrupt?: (info: audio.InterruptEvent) => void
@@ -108,6 +115,7 @@ export class MediaService {
     this.avPlayer?.on('error', this.onError)
     this.avPlayer?.on('timeUpdate', this.onTimeUpdate)
     this.avPlayer?.on('durationUpdate', this.onDurationUpdate)
+    this.avPlayer?.on('seekDone',this.onSeekDone)
   }
 
   private offAllCallback() {
@@ -152,16 +160,17 @@ export class MediaService {
       if(this.mediaDataIndex(media) == -1){
         this.playerList.push(media)
       }
-    }
-    if (this.avPlayer?.state == 'idle' && media && media.mediaUrl?.trim().length>0) {
-      this.avPlayer.url = media.mediaUrl
-      this.mediaData = media
-      AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
-    }
-    if (this.avPlayer?.state == 'playing'){
-      this.avPlayer?.pause()
-    } else if (this.avPlayer?.state != 'idle') {
-      this.avPlayer?.play()
+      if (this.avPlayer?.state == 'idle' && media.mediaUrl?.trim().length>0) {
+        this.avPlayer.url = media.mediaUrl
+        this.mediaData = media
+        AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+      }
+    } else {
+      if (this.avPlayer?.state == 'playing'){
+        this.avPlayer?.pause()
+      } else if (this.avPlayer?.state != 'idle') {
+        this.avPlayer?.play()
+      }
     }
   }
 
@@ -216,6 +225,27 @@ export class MediaService {
       }).catch((e:BusinessError)=>{
         LogUtil.error(`媒体会话激活失败${e.message}`,e)
       })
+      let wantAgentInfo: wantAgent.WantAgentInfo = {
+        wants: [
+          {
+            bundleName: context.abilityInfo.bundleName,
+            abilityName: context.abilityInfo.name
+          }
+        ],
+        operationType: wantAgent.OperationType.START_ABILITIES,
+        requestCode: 0,
+        wantAgentFlags: [wantAgent.WantAgentFlags.UPDATE_PRESENT_FLAG]
+      }
+      wantAgent.getWantAgent(wantAgentInfo).then((agent) => {
+        avSession.setLaunchAbility(agent).catch((e:BusinessError)=>{
+          LogUtil.error(`媒体会话setLaunchAbility失败${e.message}`,e)
+        })
+      })
+      this.avSession.on('play', ()=>{this.playMedia()});
+      this.avSession.on('pause',()=>{this.playMedia()});
+      this.avSession.on('playNext',()=>{this.playNext()});
+      this.avSession.on('playPrevious', ()=>{this.playPrev()});
+      this.avSession.on('seek',(time: number)=>{this.avPlayer?.seek(time)})
     }).catch((e:BusinessError)=>{
       LogUtil.error(`创建媒体会话avSession失败：${e.message}`,e)
     })
