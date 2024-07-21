@@ -10,6 +10,7 @@ import { WorkTracks } from './WorkTrack';
 import { parseVttFileStr } from '../util/VttUtil';
 import { WebVtt } from '../entity/WebVttData';
 import { Element } from 'domhandler';
+import { CardPanel, CardPanels } from '../entity/CardPanel';
 
 //TODO 替换axios 为 rcp
 export namespace WebResource {
@@ -139,7 +140,7 @@ export namespace WebResource {
     })
   }
 
-  export async function getHaNiMe():Promise<string>{
+  export async function getHaNiMe():Promise<CardPanels>{
     const session = rcp.createSession({
       baseAddress:'https://hanime1.me',
       headers:{
@@ -157,44 +158,73 @@ export namespace WebResource {
       }
     })
     return session.get('/').then((rep: rcp.Response) => {
-      console.info(`Response succeeded: ${rep}`);
-      const decoder =new util.StringDecoder('utf-8')
-      const body = decoder.write(new Uint8Array(rep.body))
-      let dom = parseDocument(body).children
-      const homeRows = DomUtils.getElementById('home-rows-wrapper', dom, true)
-      const videoDiv = DomUtils.getElements({["class"]:'home-rows-videos-div'},homeRows,true)
-      videoDiv.map(item=>{
-        const pageUrl = DomUtils.getAttributeValue(item.parent as Element,'href')
-        const imgTag = DomUtils.getElementsByTagName('img',item,true,1)
-        const imageUrl = DomUtils.getAttributeValue(imgTag[0],'src')
-        const titleDiv = DomUtils.getElements({['class']:'home-rows-videos-title'},item,true,1)
-        const title = DomUtils.textContent(titleDiv[0])
-        LogUtil.info(`title:${title} imgUrl:${imageUrl} pageUrl:${pageUrl}`)
-      })
-      const cardPanel = DomUtils.getElements({['class']:'card-mobile-panel inner'},dom,true)
-      cardPanel.map(item=>{
-        const parentClass = DomUtils.getAttributeValue(item.parent as Element,'class')
-        if('multiple-link-wrapper search-doujin-videos home-doujin-videos hidden-xs' == parentClass) {
-          const title = DomUtils.getAttributeValue(item.parent as Element, 'title')
-          const aTag = DomUtils.getElementsByTagName('a',item.parent,true,1)
-          const pageUrl = DomUtils.getAttributeValue(aTag[0], 'href')
-          const durationAndViews = DomUtils.getElements({ ['class']: 'card-mobile-duration' }, item, true)
-          const duration = DomUtils.textContent(durationAndViews[0]).replace(/\s*|\t|\r|\n/g, '')
-          const views = DomUtils.textContent(durationAndViews[1]).replace(/\s*|\t|\r|\n/g, '')
-          const imgTag = DomUtils.getElementsByTagName('img',item,true)
-          if (imgTag.length==2) {
-            const imageUrl = DomUtils.getAttributeValue(imgTag[1],'src')
-            LogUtil.info(`title:${title} duration:${duration} views:${views} imgUrl:${imageUrl} pageUrl:${pageUrl}`)
-          }
-        }
-      })
-      return body
+      if (rep.statusCode == 200) {
+        const body = rep.toString()||''
+        return taskpool.execute(analysisCardPanel,body).then(result => {
+          return result as CardPanels
+        })
+      }
+      return []
     }).catch((err: BusinessError) => {
       console.error(`Response err: Code is ${err.code}, message is ${JSON.stringify(err)}`);
-      return ''
+      return []
     }).finally(()=>{
       session.close()
     });
+  }
+
+  @Concurrent
+  function analysisCardPanel(pageHtml: string): CardPanels {
+    if (pageHtml.length==0) {
+      return []
+    }
+    let dom = parseDocument(pageHtml).children
+    const homeRows = DomUtils.getElementById('home-rows-wrapper', dom, true)
+    const videoDiv = DomUtils.getElements({["class"]:'home-rows-videos-div'},homeRows,true)
+
+    const result =videoDiv.map<CardPanel>(item=>{
+      const pageUrl = DomUtils.getAttributeValue(item.parent as Element,'href')
+      const imgTag = DomUtils.getElementsByTagName('img',item,true,1)
+      const imageUrl = DomUtils.getAttributeValue(imgTag[0],'src')||''
+      const titleDiv = DomUtils.getElements({['class']:'home-rows-videos-title'},item,true,1)
+      const title = DomUtils.textContent(titleDiv[0])
+      LogUtil.info(`title:${title} imgUrl:${imageUrl} pageUrl:${pageUrl}`)
+      return {
+        id:title,
+        title:title,
+        image:imageUrl,
+        pageUrl:pageUrl
+      }
+    })
+    const cardPanel = DomUtils.getElements({['class']:'card-mobile-panel inner'},dom,true)
+    for (let item of cardPanel){
+      const parentClass = DomUtils.getAttributeValue(item.parent as Element,'class')
+      if('multiple-link-wrapper search-doujin-videos home-doujin-videos hidden-xs' == parentClass) {
+        const title = DomUtils.getAttributeValue(item.parent as Element, 'title')||''
+        const aTag = DomUtils.getElementsByTagName('a',item.parent,true,1)
+        const pageUrl = DomUtils.getAttributeValue(aTag[0], 'href')
+        const durationAndViews = DomUtils.getElements({ ['class']: 'card-mobile-duration' }, item, true)
+        if (durationAndViews.length == 0) {
+          continue
+        }
+        const duration = DomUtils.textContent(durationAndViews[0])?.replace(/\s*|\t|\r|\n/g, '')
+        const views = DomUtils.textContent(durationAndViews[1])?.replace(/\s*|\t|\r|\n/g, '')
+        const imgTag = DomUtils.getElementsByTagName('img',item,true)
+        if (imgTag.length==2) {
+          const imageUrl = DomUtils.getAttributeValue(imgTag[1],'src')||''
+          LogUtil.info(`title:${title} duration:${duration} views:${views} imgUrl:${imageUrl} pageUrl:${pageUrl}`)
+          result.push({
+            id: title,
+            title: title,
+            image: imageUrl,
+            durationStr: duration,
+            viewsStr:views,
+            pageUrl:pageUrl
+          })
+        }
+      }
+    }
+    return result
   }
 
   export async function getDBMsin() {

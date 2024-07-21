@@ -32,7 +32,15 @@ export const PLAY_MEDIA_DATA:string ='playMediaData'
  * */
 export const WORK_TRACKS:string = 'WorkTracks'
 
+/**
+ * 歌词
+ * */
 export const LYRICS:string = 'lyrics'
+
+/**
+ * 歌词
+ * */
+export const BACKGROUND_TASK:string = 'backgroundTask'
 
 /**
  * 播放模式

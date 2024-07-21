@@ -1,7 +1,7 @@
 import { common, WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { PLAY_STATE } from '../constant/AppStorageConstant';
+import { BACKGROUND_TASK, PLAY_STATE } from '../constant/AppStorageConstant';
 import { LogUtil } from './LogUtil';
 import { media } from '@kit.MediaKit';
 
@@ -31,17 +31,22 @@ export function startBackGroundTask(context: common.UIAbilityContext){
   wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
     backgroundTaskManager.startBackgroundRunning(context,
       backgroundTaskManager.BackgroundMode.AUDIO_PLAYBACK, wantAgentObj).then(() => {
-      LogUtil.info(`Succeeded in operationing startBackgroundRunning.`);
-    }).catch((err: BusinessError) => {
-      LogUtil.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-    });
+        AppStorage.setOrCreate<boolean>(BACKGROUND_TASK,true)
+        LogUtil.info(`Succeeded in operationing startBackgroundRunning.`);
+      }).catch((err: BusinessError) => {
+        LogUtil.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
+      });
   });
 }
 
 export function stopBackGroundTask(context: common.UIAbilityContext){
-  backgroundTaskManager.stopBackgroundRunning(context).then(() => {
-    LogUtil.info(`Succeeded in operationing stopBackgroundRunning.`);
-  }).catch((err: BusinessError) => {
-    LogUtil.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
-  });
+  const task = AppStorage.get<boolean>(BACKGROUND_TASK)
+  if (task == true) {
+    backgroundTaskManager.stopBackgroundRunning(context).then(() => {
+      AppStorage.setOrCreate<boolean>(BACKGROUND_TASK,false)
+      LogUtil.info(`Succeeded in operationing stopBackgroundRunning.`);
+    }).catch((err: BusinessError) => {
+      LogUtil.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
+    });
+  }
 }
