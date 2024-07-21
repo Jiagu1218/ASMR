@@ -55,6 +55,7 @@ struct AsmrWork {
    * */
   @State list: LazyDataSource<WorkInfo> = new LazyDataSource()
   aboutToAppear(): void {
+    WebResource.getHaNiMe()
     this.oneListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.oneLine(mediaQueryResult) })
     this.twoListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.twoLine(mediaQueryResult) })
     this.threeListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.threeLine(mediaQueryResult) })

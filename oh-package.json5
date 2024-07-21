@@ -2,7 +2,7 @@
   "modelVersion": "5.0.0",
   "description": "Please describe the basic information.",
   "dependencies": {
-    "@ohos/axios": "^2.2.0",
+    "@ohos/axios": "^2.2.2",
     "@ohos/htmlparser2": "^1.0.0",
     "domhandler": "^5.0.3",
     "dayjs": "^1.11.7"
