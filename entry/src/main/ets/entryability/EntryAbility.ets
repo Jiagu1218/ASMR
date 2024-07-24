@@ -3,6 +3,9 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import dataSourcePool from '../pool/DataSourcePool';
 import { startBackGroundTask, stopBackGroundTask } from '../util/BackGroundTaskUtil';
+import { HaNiMeSession } from '../net/HaNiMeSession';
+import { ComicSession } from '../net/ComicSession';
+import { MediaService } from '../service/MediaService';
 
 
 export default class EntryAbility extends UIAbility {
@@ -12,6 +15,9 @@ export default class EntryAbility extends UIAbility {
   }
 
   onDestroy(): void {
+    MediaService.close()
+    HaNiMeSession.close()
+    ComicSession.close()
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onDestroy');
   }
 

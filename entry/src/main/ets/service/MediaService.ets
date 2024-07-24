@@ -253,4 +253,11 @@ export class MediaService {
     }
     return MediaService.instance
   }
+
+  static close(){
+    MediaService.instance?.avPlayer?.release()
+    MediaService.instance?.avSession?.destroy()
+    MediaService.instance = undefined;
+
+  }
 }

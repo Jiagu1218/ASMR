@@ -4,8 +4,9 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { BACKGROUND_TASK, PLAY_STATE } from '../constant/AppStorageConstant';
 import { LogUtil } from './LogUtil';
 import { media } from '@kit.MediaKit';
-
-const BUNDLE_NAME:string = 'com.xjg.asmr'
+/**
+ * 开启后台长时任务
+ * */
 export function startBackGroundTask(context: common.UIAbilityContext){
   if(AppStorage.get<media.AVPlayerState>(PLAY_STATE) != 'playing'){
     return
@@ -39,6 +40,9 @@ export function startBackGroundTask(context: common.UIAbilityContext){
   });
 }
 
+/**
+ * 关闭后台长时任务
+ * */
 export function stopBackGroundTask(context: common.UIAbilityContext){
   const task = AppStorage.get<boolean>(BACKGROUND_TASK)
   if (task == true) {

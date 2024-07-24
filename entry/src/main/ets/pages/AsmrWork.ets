@@ -8,6 +8,8 @@ import { MediaService } from '../service/MediaService'
 import { LogUtil } from '../util/LogUtil'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { common } from '@kit.AbilityKit'
+import { HaNiMeSession } from '../net/HaNiMeSession'
+import { ComicSession } from '../net/ComicSession'
 
 @Entry
 @Component
@@ -55,12 +57,30 @@ struct AsmrWork {
    * */
   @State list: LazyDataSource<WorkInfo> = new LazyDataSource()
   aboutToAppear(): void {
-    WebResource.getHaNiMe()
+    HaNiMeSession.build().home().then(result =>{
+      LogUtil.info('HaNiMeSession home:'+JSON.stringify(result))
+    }).catch((e:BusinessError)=>{
+      LogUtil.error('HaNiMeSession home'+e.message)
+    })
+    // HaNiMeSession.build().playerPage('91015').then(result =>{
+    //   LogUtil.info('playerPage:'+JSON.stringify(result))
+    // }).catch((e:BusinessError)=>{
+    //   LogUtil.error('playerPage')
+    // })
+    // HaNiMeSession.build().hentai({genre:'泡麵番'}).then(result =>{
+    //   LogUtil.info('hentai:'+JSON.stringify(result))
+    // }).catch((e:BusinessError)=>{
+    //   LogUtil.error('hentai')
+    // })
+    ComicSession.build().home().then(result =>{
+      LogUtil.info('ComicSession home:'+JSON.stringify(result))
+    }).catch((e:BusinessError)=>{
+      LogUtil.error('ComicSession home'+e.message)
+    })
     this.oneListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.oneLine(mediaQueryResult) })
     this.twoListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.twoLine(mediaQueryResult) })
     this.threeListener.on('change',(mediaQueryResult:mediaquery.MediaQueryResult) => { this.threeLine(mediaQueryResult) })
     this.displayWidth = px2vp(display.getDefaultDisplaySync().width)
-    // this.getWaterFlowColumnsTemplate(this.displayWidth)
     this.getWorks()
   }
 

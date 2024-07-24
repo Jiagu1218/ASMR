@@ -16,4 +16,6 @@ export interface CardPanel{
   favoritesStr?:string
   comments?:number
   commentsStr?:string
+  topLeftStr?:string
+  topRightStr?:string
 }

@@ -3,7 +3,7 @@ import { rcp } from '@kit.RemoteCommunicationKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { DomUtils, parseDocument } from '@ohos/htmlparser2';
 import { Article } from '../entity/Article';
-import { taskpool, util } from '@kit.ArkTS';
+import { taskpool, url } from '@kit.ArkTS';
 import { LogUtil } from '../util/LogUtil';
 import { Works } from './Works';
 import { WorkTracks } from './WorkTrack';
@@ -11,6 +11,7 @@ import { parseVttFileStr } from '../util/VttUtil';
 import { WebVtt } from '../entity/WebVttData';
 import { Element } from 'domhandler';
 import { CardPanel, CardPanels } from '../entity/CardPanel';
+import { HaNiMeSession } from './HaNiMeSession';
 
 //TODO 替换axios 为 rcp
 export namespace WebResource {
@@ -183,17 +184,18 @@ export namespace WebResource {
     const videoDiv = DomUtils.getElements({["class"]:'home-rows-videos-div'},homeRows,true)
 
     const result =videoDiv.map<CardPanel>(item=>{
-      const pageUrl = DomUtils.getAttributeValue(item.parent as Element,'href')
+      const pageUrl = url.URL.parseURL(DomUtils.getAttributeValue(item.parent as Element,'href'))
+      const id = pageUrl.params.get('v')||''
       const imgTag = DomUtils.getElementsByTagName('img',item,true,1)
       const imageUrl = DomUtils.getAttributeValue(imgTag[0],'src')||''
       const titleDiv = DomUtils.getElements({['class']:'home-rows-videos-title'},item,true,1)
       const title = DomUtils.textContent(titleDiv[0])
       LogUtil.info(`title:${title} imgUrl:${imageUrl} pageUrl:${pageUrl}`)
       return {
-        id:title,
+        id:id,
         title:title,
         image:imageUrl,
-        pageUrl:pageUrl
+        pageUrl:pageUrl.toString()
       }
     })
     const cardPanel = DomUtils.getElements({['class']:'card-mobile-panel inner'},dom,true)
