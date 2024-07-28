@@ -58,7 +58,7 @@ struct Index {
 
   aboutToAppear(): void {
     this.loading = true
-    emitter.once(AppStorageConstants.DATA_SOURCE_POOL_INIT_FINISH,()=>{
+    emitter.once(AppStorageConstants.DATA_SOURCE_POOL_INIT_FINISH,(data:emitter.EventData)=>{
       setTimeout(()=>{
         this.getData()
       },100)
