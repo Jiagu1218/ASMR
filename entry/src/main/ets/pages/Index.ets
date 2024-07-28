@@ -86,11 +86,14 @@ struct Index {
         LazyForEach(this.list, (item: Article) => {
           ListItem() {
             Card({
-              src: item.imgUrl,
-              fav: item.fav,
-              duration: item.duration,
-              views: item.views,
-              title: item.title
+              info:{
+                id: item.rjCode,
+                image: item.imgUrl,
+                favoritesStr:item.fav,
+                durationStr:item.duration,
+                viewsStr:item.views,
+                title:item.title
+              }
             })
           }.onClick(async () => {
             LogUtil.info(item.rjCode, item.pageUrl)

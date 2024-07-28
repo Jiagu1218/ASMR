@@ -2,6 +2,7 @@
   "src": [
     "pages/Index",
     "pages/AsmrWork",
-    "pages/Player"
+    "pages/Player",
+    "pages/HaNiMePage"
   ]
 }

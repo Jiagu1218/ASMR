@@ -27,7 +27,7 @@ export function analysisCardPanel(pageHtml: string): CardPanels {
     const imgTag = DomUtils.getElementsByTagName('img',item,true,1)
     const imageUrl = DomUtils.getAttributeValue(imgTag[0],'src')||''
     const titleDiv = DomUtils.getElements({['class']:'home-rows-videos-title'},item,true,1)
-    const title = DomUtils.textContent(titleDiv[0])
+    const title = DomUtils.textContent(titleDiv[0])?.replace(/\s*|\t|\r|\n/g, '')
     return {
       id:id,
       title:title,

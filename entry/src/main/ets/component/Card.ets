@@ -1,6 +1,8 @@
 /**
  * 图片上文字样式
  * */
+import { CardPanel } from '../entity/CardPanel'
+
 @Extend(Text) function imgText(){
   .padding({
     left:$r('sys.float.ohos_id_textfield_padding_horizontal'),
@@ -18,38 +20,48 @@
 @Preview
 @Component
 export struct Card{
-  @Prop src:string = 'https://www.hentaiasmr.moe/wp-content/uploads/2024/06/1ryxyicd_o.jpg'
-  @Prop fav:string = '1'
-  @Prop views:string = '100'
-  @Prop duration:string = '15:00'
-  @Prop title:string = '熟れた女20熟したバニーさんに搾り取られたい'
+  @Require @Prop info:CardPanel
+  // @Require @Prop src:string = 'https://www.hentaiasmr.moe/wp-content/uploads/2024/06/1ryxyicd_o.jpg'
+  // @Require @Prop fav:string = '1'
+  // @Require @Prop views:string = '100'
+  // @Require @Prop duration:string = '15:00'
+  // @Require @Prop title:string = '熟れた女20熟したバニーさんに搾り取られたい'
   build() {
     Column(){
       Stack() {
-        Image(this.src)
+        Image(this.info.image)
           .width("100%")
           .height("100%")
           .borderRadius($r('sys.float.ohos_id_card_border_radius'))
         Column() {
           Row() {
-            Text(){
-              SymbolSpan($r('sys.symbol.heart')).fontColor([Color.Red]).fontWeight(FontWeight.Medium)
-              Span(this.fav)
-            }.letterSpacing(5)
-            .imgText()
+            if (this.info.favorites||this.info.favoritesStr){
+              Text(){
+                SymbolSpan($r('sys.symbol.heart')).fontColor([Color.Red]).fontWeight(FontWeight.Medium)
+                Span(this.info.favoritesStr?this.info.favoritesStr:this.info.favorites+'')
+              }.letterSpacing(5)
+              .imgText()
+            }
           }
           .width("100%")
           // .height("14vp")
           .justifyContent(FlexAlign.SpaceBetween)
           Row() {
-            Text(){
-              SymbolSpan($r('sys.symbol.clock')).fontWeight(FontWeight.Medium)
-              Span(this.duration)
-            }.imgText()
-            Text(){
-              SymbolSpan($r('sys.symbol.eye')).fontWeight(FontWeight.Medium)
-              Span(this.views).padding({left:$r('sys.float.ohos_id_textfield_padding_horizontal')})
-            }.imgText()
+            if (this.info.views||this.info.viewsStr||this.info.duration||this.info.durationStr){
+              Text(){
+                if (this.info.duration||this.info.durationStr){
+                  SymbolSpan($r('sys.symbol.clock')).fontWeight(FontWeight.Medium)
+                  Span(this.info.durationStr?this.info.durationStr:this.info.duration+'')
+                }
+              }.imgText()
+              Text(){
+                if(this.info.views||this.info.viewsStr){
+                  SymbolSpan($r('sys.symbol.eye')).fontWeight(FontWeight.Medium)
+                  Span(this.info.viewsStr?this.info.viewsStr:this.info.views+'')
+                    .padding({left:$r('sys.float.ohos_id_textfield_padding_horizontal')})
+                }
+              }.imgText()
+            }
           }
           // .linearGradient({ colors: [['rgba(0,0,0,0)', 0], ['rgba(0,0,0,0.8)', 1]] })
           .width("100%")
@@ -66,7 +78,7 @@ export struct Card{
       .aspectRatio(16/9)
       // .height(200)
       Row() {
-        Text(this.title)
+        Text(this.info.title)
           .width("100%")
           .height("100%")
           .fontSize("16fp")

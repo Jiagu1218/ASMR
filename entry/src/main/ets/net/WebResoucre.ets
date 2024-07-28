@@ -12,6 +12,7 @@ import { WebVtt } from '../entity/WebVttData';
 import { Element } from 'domhandler';
 import { CardPanel, CardPanels } from '../entity/CardPanel';
 import { HaNiMeSession } from './HaNiMeSession';
+import { VideoMediaData } from '../entity/VideoMediaData';
 
 //TODO 替换axios 为 rcp
 export namespace WebResource {
@@ -256,5 +257,12 @@ export namespace WebResource {
       console.error('getVtt', e)
       return []
     })
+  }
+
+  export async function getHaNiMeHomeData():Promise<CardPanels>{
+    return HaNiMeSession.build().home()
+  }
+  export async function getHaNiMeVideoData(id:string):Promise<VideoMediaData>{
+    return HaNiMeSession.build().playerPage(id)
   }
 }

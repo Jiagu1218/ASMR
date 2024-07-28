@@ -34,7 +34,7 @@ export default class EntryAbility extends UIAbility {
       data.setWindowLayoutFullScreen(true)
       console.info('Succeeded in obtaining the top window. Data: ' + JSON.stringify(data));
     });
-    windowStage.loadContent('pages/AsmrWork', (err) => {
+    windowStage.loadContent('pages/HaNiMePage', (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;
