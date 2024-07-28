@@ -2,12 +2,6 @@ import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
 import MediaData from '../entity/MediaData';
-import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
-  PlayerMode,
-  PLAY_MEDIA_DATA,
-  PLAY_MODE,
-  PLAY_STATE,
-  WORK_TRACKS } from '../constant/AppStorageConstant';
 import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
@@ -18,7 +12,7 @@ import { WorkTrackDialog } from '../component/WorkTrackDialog';
 import { media } from '@kit.MediaKit';
 import { startBackGroundTask } from '../util/BackGroundTaskUtil';
 import { common } from '@kit.AbilityKit';
-import { LogUtil, parseMillisecondDuration } from 'common';
+import { LogUtil, DayJsUtil, AppStorageConstants } from 'common';
 
 @Preview
 @Entry
@@ -34,17 +28,17 @@ struct Player {
   mdListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
   lgListener:mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
 
-  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this) as common.UIAbilityContext)
-  @StorageLink(PLAY_STATE) playerState:media.AVPlayerState = 'idle'
-  @StorageLink(PLAY_MODE) @Watch('modeChange') playerMode:PlayerMode = 'order'
+  @StorageLink(AppStorageConstants.MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this) as common.UIAbilityContext)
+  @StorageLink(AppStorageConstants.PLAY_STATE) playerState:media.AVPlayerState = 'idle'
+  @StorageLink(AppStorageConstants.PLAY_MODE) @Watch('modeChange') playerMode:AppStorageConstants.PlayerMode = 'order'
   @State lyrics:WebVtt = []
   @State @Watch('lyricIndexChange') lyricIndex:number = -1
   @State modeIcon:Resource = $r('sys.symbol.order_play')
   @State lyricsArray:LrcEntry[] = []
-  @StorageLink(DURATION) duration:number = 0
-  @StorageLink(CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
-  @StorageLink(WORK_TRACKS) workTracks:WorkTracks = []
-  @StorageLink(PLAY_MEDIA_DATA) mediaData: MediaData = {
+  @StorageLink(AppStorageConstants.DURATION) duration:number = 0
+  @StorageLink(AppStorageConstants.CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
+  @StorageLink(AppStorageConstants.WORK_TRACKS) workTracks:WorkTracks = []
+  @StorageLink(AppStorageConstants.PLAY_MEDIA_DATA) mediaData: MediaData = {
     id: '0',
     title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
     duration: 100,
@@ -125,7 +119,7 @@ struct Player {
 
   menu(){
     WebResource.getWorkTracks(this.mediaData.id).then(workTracks=>{
-      AppStorage.setOrCreate<WorkTracks>(WORK_TRACKS,workTracks)
+      AppStorage.setOrCreate<WorkTracks>(AppStorageConstants.WORK_TRACKS,workTracks)
       this.dialogController.open()
     }).catch((e:BusinessError)=>{
       LogUtil.error(e.message)
@@ -301,8 +295,8 @@ struct Player {
           Progress({value: this.currentTime, total:this.duration,type:ProgressType.Linear})
         }.width('100%')
         Row(){
-          Text(`${parseMillisecondDuration(this.currentTime)}`)
-          Text(`${parseMillisecondDuration(this.duration)}`)
+          Text(`${DayJsUtil.parseMillisecondDuration(this.currentTime)}`)
+          Text(`${DayJsUtil.parseMillisecondDuration(this.duration)}`)
         }.justifyContent(FlexAlign.SpaceBetween).width('100%')
       }.width('100%').height(48)
       Row(){

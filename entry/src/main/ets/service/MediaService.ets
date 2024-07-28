@@ -2,19 +2,11 @@ import { media } from '@kit.MediaKit';
 import { avSession as AVSessionManager } from '@kit.AVSessionKit';
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit';
 import { audio } from '@kit.AudioKit';
-import {
-  CURRENT_TIME,
-  DURATION,
-  MEDIA_SERVICE,
-  PLAY_MEDIA_DATA,
-  PLAY_MODE,
-  PLAY_STATE,
-  PlayerMode
-} from '../constant/AppStorageConstant';
+
 import MediaData from '../entity/MediaData';
 import { createAVSession, setAVMataData, setAVPlaybackState, setAVPlaybackStatePosition } from '../util/AVSessionUtil';
 import { common } from '@kit.AbilityKit';
-import { LogUtil } from 'common';
+import { AppStorageConstants, LogUtil } from 'common';
 
 
 export class MediaService {
@@ -22,7 +14,7 @@ export class MediaService {
   private context?: common.UIAbilityContext
   private avPlayer?: media.AVPlayer
   private avSession?:AVSessionManager.AVSession
-  private playerMode: PlayerMode = 'order'
+  private playerMode: AppStorageConstants.PlayerMode = 'order'
   private playerState: media.AVPlayerState = 'idle'
   private playerList: MediaData[] = []
   private mediaData?:MediaData
@@ -48,7 +40,7 @@ export class MediaService {
   private onStateChange: (state: media.AVPlayerState, reason: media.StateChangeReason) => void =
     (state: media.AVPlayerState, reason: media.StateChangeReason) => {
       this.playerState = state
-      AppStorage.setOrCreate<media.AVPlayerState>(PLAY_STATE, state)
+      AppStorage.setOrCreate<media.AVPlayerState>(AppStorageConstants.PLAY_STATE, state)
       setAVPlaybackState(this.avSession!,state)
       switch(state) {
         case 'idle': // 成功调用reset接口后触发该状态机上报
@@ -87,13 +79,13 @@ export class MediaService {
     }
 
   private onTimeUpdate: (time: number) => void = (time: number) => {
-    AppStorage.setOrCreate<number>(CURRENT_TIME, time)
+    AppStorage.setOrCreate<number>(AppStorageConstants.CURRENT_TIME, time)
   }
 
   private onDurationUpdate: (time: number) => void = (time: number) => {
     this.mediaData!.duration = time
     setAVMataData(this.avSession!,this.mediaData!)
-    AppStorage.setOrCreate<number>(DURATION, time)
+    AppStorage.setOrCreate<number>(AppStorageConstants.DURATION, time)
   }
 
   private onError: ErrorCallback = (error: BusinessError) => {
@@ -133,7 +125,7 @@ export class MediaService {
       if (this.mediaDataIndex(mediaData) == -1) {
         this.playerList.push(mediaData)
         if (this.avPlayer?.state != 'playing') {
-          AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,mediaData)
+          AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,mediaData)
         }
       }
     })
@@ -157,7 +149,7 @@ export class MediaService {
     if(media){
       if(!this.mediaData){
         this.mediaData = media
-        AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+        AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
       }
       if(this.mediaDataIndex(media) == -1){
         this.playerList.push(media)
@@ -165,7 +157,7 @@ export class MediaService {
       if (this.avPlayer?.state == 'idle' && media.mediaUrl?.trim().length>0) {
         this.avPlayer.url = media.mediaUrl
         this.mediaData = media
-        AppStorage.setOrCreate<MediaData>(PLAY_MEDIA_DATA,media)
+        AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
       }
     } else {
       if (this.avPlayer?.state == 'playing'){
@@ -208,14 +200,14 @@ export class MediaService {
     if (this.avPlayer && (state === 'prepared' || state === 'playing' || state === 'paused' || state === 'completed')) {
       const modes = ['order','random','single']
       const index = modes.indexOf(this.playerMode) + 1
-      const mode = (index>= modes.length? modes[0] : modes[index]) as PlayerMode
+      const mode = (index>= modes.length? modes[0] : modes[index]) as AppStorageConstants.PlayerMode
       if (mode == 'single') {
         this.avPlayer!.loop = true
       }else {
         this.avPlayer!.loop = false
       }
       this.playerMode = mode
-      AppStorage.setOrCreate<PlayerMode>(PLAY_MODE,mode)
+      AppStorage.setOrCreate<AppStorageConstants.PlayerMode>(AppStorageConstants.PLAY_MODE,mode)
     }
   }
 
@@ -249,7 +241,7 @@ export class MediaService {
   static build(context: common.UIAbilityContext): MediaService {
     if (!MediaService.instance) {
       MediaService.instance = new MediaService(context);
-      AppStorage.setOrCreate<MediaService>(MEDIA_SERVICE, MediaService.instance)
+      AppStorage.setOrCreate<MediaService>(AppStorageConstants.MEDIA_SERVICE, MediaService.instance)
     }
     return MediaService.instance
   }

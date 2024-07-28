@@ -1,5 +1,5 @@
 import { util } from '@kit.ArkTS';
-import { formatTimeToDurationMs, LogUtil } from 'common';
+import { DayJsUtil, LogUtil } from 'common';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 
 /**
@@ -51,8 +51,8 @@ export function parseVttFileStr(fileString: string): WebVtt {
           const times = line.split(' --> ')
 
           webVttData.start = times[0]
-          const startTime = formatTimeToDurationMs(times[0])
-          const endTime = formatTimeToDurationMs(times[1])
+          const startTime = DayJsUtil.formatTimeToDurationMs(times[0])
+          const endTime = DayJsUtil.formatTimeToDurationMs(times[1])
           webVttData.startTime = startTime
           webVttData.endTime = endTime
           webVttData.end = times[1]

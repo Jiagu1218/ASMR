@@ -3,19 +3,18 @@ import { WorkCard } from '../component/WorkCard'
 import { WebResource } from '../net/WebResoucre'
 import { WorkInfo } from '../net/WorkInfo'
 import { display, mediaquery, router } from '@kit.ArkUI'
-import { MEDIA_SERVICE } from '../constant/AppStorageConstant'
 import { MediaService } from '../service/MediaService'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { common } from '@kit.AbilityKit'
 import { HaNiMeSession } from '../net/HaNiMeSession'
 import { ComicSession } from '../net/ComicSession'
-import { LazyDataSource, LogUtil } from 'common'
+import { AppStorageConstants, LazyDataSource, LogUtil } from 'common'
 
 @Entry
 @Component
 struct AsmrWork {
   pageNum:number = 1
-  @StorageLink(MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this)  as common.UIAbilityContext)
+  @StorageLink(AppStorageConstants.MEDIA_SERVICE) mediaService:MediaService = MediaService.build(getContext(this)  as common.UIAbilityContext)
   @State useWaterFlows:boolean = true
   displayWidth:number = 720
   @State waterFlowColumnsTemplate:string = '1fr '

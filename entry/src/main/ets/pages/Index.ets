@@ -7,8 +7,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import dataSourcePool from '../pool/DataSourcePool';
 import { emitter } from '@kit.BasicServicesKit';
 import { router } from '@kit.ArkUI';
-import { DATA_SOURCE_POOL_INIT_FINISH } from '../constant/AppStorageConstant';
-import { Card,LazyDataSource,LogUtil } from 'common';
+import { Card,LazyDataSource,LogUtil,AppStorageConstants } from 'common';
 
 @Entry
 @Component
@@ -59,7 +58,7 @@ struct Index {
 
   aboutToAppear(): void {
     this.loading = true
-    emitter.once(DATA_SOURCE_POOL_INIT_FINISH,()=>{
+    emitter.once(AppStorageConstants.DATA_SOURCE_POOL_INIT_FINISH,()=>{
       setTimeout(()=>{
         this.getData()
       },100)

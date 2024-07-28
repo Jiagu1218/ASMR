@@ -3,8 +3,7 @@ import { Queue } from '@kit.ArkTS';
 import { ArkTSUtils } from '@kit.ArkTS'
 import { WebResource } from '../net/WebResoucre';
 import emitter from '@ohos.events.emitter';
-import { DATA_SOURCE_POOL_INIT_FINISH } from '../constant/AppStorageConstant';
-import { LogUtil } from 'common';
+import { AppStorageConstants, LogUtil } from 'common';
 
 class DataSourcePool {
   private pageNum: number = 1;
@@ -48,7 +47,7 @@ class DataSourcePool {
   async init(): Promise<void> {
     const result = await WebResource.getListHtmlResource(this.pageNum);
     await this.addData(...result);
-    emitter.emit(DATA_SOURCE_POOL_INIT_FINISH);
+    emitter.emit(AppStorageConstants.DATA_SOURCE_POOL_INIT_FINISH);
     this.pageNum++;
   }
 }

@@ -1,15 +1,14 @@
 import { common, WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { BACKGROUND_TASK, PLAY_STATE } from '../constant/AppStorageConstant';
 import { media } from '@kit.MediaKit';
-import { LogUtil } from 'common';
+import { LogUtil,AppStorageConstants } from 'common';
 
 /**
  * 开启后台长时任务
  * */
 export function startBackGroundTask(context: common.UIAbilityContext){
-  if(AppStorage.get<media.AVPlayerState>(PLAY_STATE) != 'playing'){
+  if(AppStorage.get<media.AVPlayerState>(AppStorageConstants.PLAY_STATE) != 'playing'){
     return
   }
   let wantAgentInfo: wantAgent.WantAgentInfo = {
@@ -33,7 +32,7 @@ export function startBackGroundTask(context: common.UIAbilityContext){
   wantAgent.getWantAgent(wantAgentInfo).then((wantAgentObj: WantAgent) => {
     backgroundTaskManager.startBackgroundRunning(context,
       backgroundTaskManager.BackgroundMode.AUDIO_PLAYBACK, wantAgentObj).then(() => {
-        AppStorage.setOrCreate<boolean>(BACKGROUND_TASK,true)
+        AppStorage.setOrCreate<boolean>(AppStorageConstants.BACKGROUND_TASK,true)
         LogUtil.info(`Succeeded in operationing startBackgroundRunning.`);
       }).catch((err: BusinessError) => {
         LogUtil.error(`Failed to operation startBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
@@ -45,10 +44,10 @@ export function startBackGroundTask(context: common.UIAbilityContext){
  * 关闭后台长时任务
  * */
 export function stopBackGroundTask(context: common.UIAbilityContext){
-  const task = AppStorage.get<boolean>(BACKGROUND_TASK)
+  const task = AppStorage.get<boolean>(AppStorageConstants.BACKGROUND_TASK)
   if (task == true) {
     backgroundTaskManager.stopBackgroundRunning(context).then(() => {
-      AppStorage.setOrCreate<boolean>(BACKGROUND_TASK,false)
+      AppStorage.setOrCreate<boolean>(AppStorageConstants.BACKGROUND_TASK,false)
       LogUtil.info(`Succeeded in operationing stopBackgroundRunning.`);
     }).catch((err: BusinessError) => {
       LogUtil.error(`Failed to operation stopBackgroundRunning. Code is ${err.code}, message is ${err.message}`);
