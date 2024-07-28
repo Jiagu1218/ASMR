@@ -2,8 +2,9 @@ import { common, WantAgent, wantAgent } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { BACKGROUND_TASK, PLAY_STATE } from '../constant/AppStorageConstant';
-import { LogUtil } from './LogUtil';
 import { media } from '@kit.MediaKit';
+import { LogUtil } from 'common';
+
 /**
  * 开启后台长时任务
  * */

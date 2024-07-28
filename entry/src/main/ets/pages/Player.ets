@@ -11,15 +11,14 @@ import { CURRENT_TIME, DURATION, MEDIA_SERVICE,
 import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
-import { parseMillisecondDuration, parseSecondDuration } from '../util/DayJsUtil';
 import ShiLrcView, { LrcEntry } from '../component/Lyrics';
 import { WorkTrack, WorkTracks } from '../net/WorkTrack';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { LogUtil } from '../util/LogUtil';
 import { WorkTrackDialog } from '../component/WorkTrackDialog';
 import { media } from '@kit.MediaKit';
 import { startBackGroundTask } from '../util/BackGroundTaskUtil';
 import { common } from '@kit.AbilityKit';
+import { LogUtil, parseMillisecondDuration } from 'common';
 
 @Preview
 @Entry

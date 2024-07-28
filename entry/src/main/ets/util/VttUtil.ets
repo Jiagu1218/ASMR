@@ -1,7 +1,6 @@
 import { util } from '@kit.ArkTS';
+import { formatTimeToDurationMs, LogUtil } from 'common';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
-import { formatTimeToDurationMs } from './DayJsUtil';
-import { LogUtil } from './LogUtil';
 
 /**
  * 读取字节流并解析 WebVTT

@@ -1,12 +1,11 @@
 import { display, mediaquery, router } from '@kit.ArkUI'
-import { LazyDataSource } from '../entity/LazyDataSource'
+
 import { HaNiMeSession } from '../net/HaNiMeSession'
-import { LogUtil } from '../util/LogUtil'
 import { BusinessError } from '@kit.BasicServicesKit'
-import { CardPanel, CardPanels } from '../entity/CardPanel'
 import { WebResource } from '../net/WebResoucre'
-import { Card } from '../component/Card'
+
 import { VideoMediaData } from '../entity/VideoMediaData'
+import { Card, CardPanel, CardPanels, LazyDataSource, LogUtil } from 'common'
 
 @Entry
 @Component

@@ -1,15 +1,15 @@
 import { WorkCard } from '../component/WorkCard'
-import { LazyDataSource } from '../entity/LazyDataSource'
+
 import { WebResource } from '../net/WebResoucre'
 import { WorkInfo } from '../net/WorkInfo'
 import { display, mediaquery, router } from '@kit.ArkUI'
 import { MEDIA_SERVICE } from '../constant/AppStorageConstant'
 import { MediaService } from '../service/MediaService'
-import { LogUtil } from '../util/LogUtil'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { common } from '@kit.AbilityKit'
 import { HaNiMeSession } from '../net/HaNiMeSession'
 import { ComicSession } from '../net/ComicSession'
+import { LazyDataSource, LogUtil } from 'common'
 
 @Entry
 @Component

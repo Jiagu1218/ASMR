@@ -4,15 +4,14 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { DomUtils, parseDocument } from '@ohos/htmlparser2';
 import { Article } from '../entity/Article';
 import { taskpool, url } from '@kit.ArkTS';
-import { LogUtil } from '../util/LogUtil';
 import { Works } from './Works';
 import { WorkTracks } from './WorkTrack';
 import { parseVttFileStr } from '../util/VttUtil';
 import { WebVtt } from '../entity/WebVttData';
 import { Element } from 'domhandler';
-import { CardPanel, CardPanels } from '../entity/CardPanel';
 import { HaNiMeSession } from './HaNiMeSession';
 import { VideoMediaData } from '../entity/VideoMediaData';
+import { CardPanel, CardPanels, LogUtil } from 'common';
 
 //TODO 替换axios 为 rcp
 export namespace WebResource {

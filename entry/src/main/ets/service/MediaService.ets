@@ -1,7 +1,6 @@
 import { media } from '@kit.MediaKit';
 import { avSession as AVSessionManager } from '@kit.AVSessionKit';
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit';
-import { LogUtil } from '../util/LogUtil';
 import { audio } from '@kit.AudioKit';
 import {
   CURRENT_TIME,
@@ -15,6 +14,7 @@ import {
 import MediaData from '../entity/MediaData';
 import { createAVSession, setAVMataData, setAVPlaybackState, setAVPlaybackStatePosition } from '../util/AVSessionUtil';
 import { common } from '@kit.AbilityKit';
+import { LogUtil } from 'common';
 
 
 export class MediaService {

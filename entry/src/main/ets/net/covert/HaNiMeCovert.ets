@@ -1,9 +1,8 @@
 import { DomUtils, parseDocument } from '@ohos/htmlparser2'
 import { Element } from 'domhandler'
-import { CardPanel, CardPanels } from '../../entity/CardPanel'
-import { LogUtil } from '../../util/LogUtil'
 import { url } from '@kit.ArkTS'
 import { VideoMediaData, VideoUrlData, VideoUrls } from '../../entity/VideoMediaData'
+import { CardPanel, CardPanels } from 'common'
 
 /**
  * 解析播放页面（首页）

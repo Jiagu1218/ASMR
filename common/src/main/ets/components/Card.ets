@@ -3,6 +3,7 @@
  * */
 import { CardPanel } from '../entity/CardPanel'
 
+
 @Extend(Text) function imgText(){
   .padding({
     left:$r('sys.float.ohos_id_textfield_padding_horizontal'),
@@ -21,11 +22,6 @@ import { CardPanel } from '../entity/CardPanel'
 @Component
 export struct Card{
   @Require @Prop info:CardPanel
-  // @Require @Prop src:string = 'https://www.hentaiasmr.moe/wp-content/uploads/2024/06/1ryxyicd_o.jpg'
-  // @Require @Prop fav:string = '1'
-  // @Require @Prop views:string = '100'
-  // @Require @Prop duration:string = '15:00'
-  // @Require @Prop title:string = '熟れた女20熟したバニーさんに搾り取られたい'
   build() {
     Column(){
       Stack() {

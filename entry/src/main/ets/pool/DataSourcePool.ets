@@ -3,8 +3,8 @@ import { Queue } from '@kit.ArkTS';
 import { ArkTSUtils } from '@kit.ArkTS'
 import { WebResource } from '../net/WebResoucre';
 import emitter from '@ohos.events.emitter';
-import { LogUtil } from '../util/LogUtil';
 import { DATA_SOURCE_POOL_INIT_FINISH } from '../constant/AppStorageConstant';
+import { LogUtil } from 'common';
 
 class DataSourcePool {
   private pageNum: number = 1;

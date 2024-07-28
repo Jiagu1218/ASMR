@@ -1,9 +1,9 @@
 import { avSession } from '@kit.AVSessionKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import MediaData from '../entity/MediaData';
-import { LogUtil } from './LogUtil';
 import { media } from '@kit.MediaKit';
 import { common, wantAgent } from '@kit.AbilityKit';
+import { LogUtil } from 'common';
 
 export async function createAVSession(context: common.UIAbilityContext):Promise<avSession.AVSession>{
   return avSession.createAVSession(context, 'ASMR_AUDIO_SESSION', 'audio').then(session=>{

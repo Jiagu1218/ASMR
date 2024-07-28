@@ -1,17 +1,14 @@
-import { Card } from '../component/Card';
+
 import { Article } from '../entity/Article';
-import { LazyDataSource } from '../entity/LazyDataSource';
 import { WebResource } from '../net/WebResoucre';
 import { SwipeRefresher } from '@ohos.arkui.advanced.SwipeRefresher';
 import { ExpandGroup } from '../component/ExpandGroup';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import dataSourcePool from '../pool/DataSourcePool';
 import { emitter } from '@kit.BasicServicesKit';
-import { LogUtil } from '../util/LogUtil';
 import { router } from '@kit.ArkUI';
-import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
-import { Want } from '@kit.AbilityKit';
 import { DATA_SOURCE_POOL_INIT_FINISH } from '../constant/AppStorageConstant';
+import { Card,LazyDataSource,LogUtil } from 'common';
 
 @Entry
 @Component

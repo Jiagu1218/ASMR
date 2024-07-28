@@ -1,10 +1,10 @@
 import { rcp } from '@kit.RemoteCommunicationKit'
-import { CardPanels } from '../entity/CardPanel'
+
 import { BusinessError } from '@kit.BasicServicesKit'
-import { LogUtil } from '../util/LogUtil'
 import { taskpool, url } from '@kit.ArkTS'
 import { analysisCardPanel, analysisHentai, analysisPlayerPage } from './covert/ComicCovert'
 import { VideoMediaData } from '../entity/VideoMediaData'
+import { CardPanels } from 'common'
 
 export class ComicSession{
   private static instance?:ComicSession

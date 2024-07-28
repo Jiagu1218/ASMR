@@ -14,7 +14,8 @@
  */
 
 import { Animator, AnimatorResult } from '@kit.ArkUI';
-import { LogUtil } from '../util/LogUtil';
+import { LogUtil } from 'common';
+
 
 export interface Word {
   /**
