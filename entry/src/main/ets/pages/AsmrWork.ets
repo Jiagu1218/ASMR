@@ -3,12 +3,12 @@ import { WorkCard } from '../component/WorkCard'
 import { WebResource } from '../net/WebResoucre'
 import { WorkInfo } from '../net/WorkInfo'
 import { display, mediaquery, router } from '@kit.ArkUI'
-import { MediaService } from '../service/MediaService'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { common } from '@kit.AbilityKit'
 import { HaNiMeSession } from '../net/HaNiMeSession'
 import { ComicSession } from '../net/ComicSession'
 import { AppStorageConstants, LazyDataSource, LogUtil } from 'common'
+import { MediaService } from 'MediaService'
 
 @Entry
 @Component

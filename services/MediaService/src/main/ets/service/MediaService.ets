@@ -3,8 +3,8 @@ import { avSession as AVSessionManager } from '@kit.AVSessionKit';
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit';
 import { audio } from '@kit.AudioKit';
 
-import MediaData from '../entity/MediaData';
-import { createAVSession, setAVMataData, setAVPlaybackState, setAVPlaybackStatePosition } from '../util/AVSessionUtil';
+import { MediaData } from '../entity/MediaData';
+import { AVSessionUtil } from '../utils/AVSessionUtil';
 import { common } from '@kit.AbilityKit';
 import { AppStorageConstants, LogUtil } from 'common';
 
@@ -41,7 +41,7 @@ export class MediaService {
     (state: media.AVPlayerState, reason: media.StateChangeReason) => {
       this.playerState = state
       AppStorage.setOrCreate<media.AVPlayerState>(AppStorageConstants.PLAY_STATE, state)
-      setAVPlaybackState(this.avSession!,state)
+      AVSessionUtil.setAVPlaybackState(this.avSession!,state)
       switch(state) {
         case 'idle': // 成功调用reset接口后触发该状态机上报
           LogUtil.info('AVPlayer state idle called.');
@@ -52,9 +52,9 @@ export class MediaService {
           break;
         case 'prepared': // prepare调用成功后上报该状态机
           LogUtil.info('AVPlayer state prepared called.');
-          setAVMataData(this.avSession!,this.mediaData!)
+          AVSessionUtil.setAVMataData(this.avSession!,this.mediaData!)
           this.avPlayer?.play(); // 调用播放接口开始播放
-          setAVPlaybackStatePosition(this.avSession!,0)
+          AVSessionUtil.setAVPlaybackStatePosition(this.avSession!,0)
           break;
         case 'playing': // play成功调用后触发该状态机上报
           break;
@@ -84,7 +84,7 @@ export class MediaService {
 
   private onDurationUpdate: (time: number) => void = (time: number) => {
     this.mediaData!.duration = time
-    setAVMataData(this.avSession!,this.mediaData!)
+    AVSessionUtil.setAVMataData(this.avSession!,this.mediaData!)
     AppStorage.setOrCreate<number>(AppStorageConstants.DURATION, time)
   }
 
@@ -95,7 +95,7 @@ export class MediaService {
   private offTimeUpdate?: () => void
   private offStateChange?: () => void
   private onSeekDone: (seekDoneTime: number) => void = (seekDoneTime: number)=>{
-    setAVPlaybackStatePosition(this.avSession!,seekDoneTime)
+    AVSessionUtil.setAVPlaybackStatePosition(this.avSession!,seekDoneTime)
   }
   private offSeekDone?: () => void
   private offDurationUpdate?: () => void
@@ -212,7 +212,7 @@ export class MediaService {
   }
 
   createSession(context: common.UIAbilityContext){
-    createAVSession(context).then(avSession=>{
+    AVSessionUtil.createAVSession(context).then(avSession=>{
       avSession.on('play', ()=>{this.playMedia()});
       avSession.on('pause',()=>{this.playMedia()});
       avSession.on('playNext',()=>{this.playNext()});

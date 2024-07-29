@@ -5,7 +5,7 @@ import dataSourcePool from '../pool/DataSourcePool';
 import { startBackGroundTask, stopBackGroundTask } from '../util/BackGroundTaskUtil';
 import { HaNiMeSession } from '../net/HaNiMeSession';
 import { ComicSession } from '../net/ComicSession';
-import { MediaService } from '../service/MediaService';
+import { MediaService,MediaData } from 'MediaService'
 
 
 export default class EntryAbility extends UIAbility {
@@ -34,7 +34,7 @@ export default class EntryAbility extends UIAbility {
       data.setWindowLayoutFullScreen(true)
       console.info('Succeeded in obtaining the top window. Data: ' + JSON.stringify(data));
     });
-    windowStage.loadContent('pages/HaNiMePage', (err) => {
+    windowStage.loadContent('pages/AsmrWork', (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;

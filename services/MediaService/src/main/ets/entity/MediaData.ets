@@ -1,7 +1,7 @@
 /**
  * 媒体信息
  * */
-export default interface MediaData {
+export interface MediaData {
   id: string
   /**
    * 标题

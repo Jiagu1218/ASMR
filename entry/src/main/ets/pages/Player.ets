@@ -1,8 +1,6 @@
 import { AVCastPicker, AVCastPickerState } from '@kit.AVSessionKit';
 import { OperationType, SubHeader } from '@ohos.arkui.advanced.SubHeader'
 import { mediaquery, router } from '@kit.ArkUI';
-import MediaData from '../entity/MediaData';
-import { MediaService } from '../service/MediaService';
 import { WebVtt, WebVttData } from '../entity/WebVttData';
 import { WebResource } from '../net/WebResoucre';
 import ShiLrcView, { LrcEntry } from '../component/Lyrics';
@@ -13,6 +11,7 @@ import { media } from '@kit.MediaKit';
 import { startBackGroundTask } from '../util/BackGroundTaskUtil';
 import { common } from '@kit.AbilityKit';
 import { LogUtil, DayJsUtil, AppStorageConstants } from 'common';
+import { MediaService,MediaData } from 'MediaService'
 
 @Preview
 @Entry

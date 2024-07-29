@@ -42,6 +42,18 @@
           ]
         }
       ]
+    },
+    {
+      "name": "MediaService",
+      "srcPath": "./services/MediaService",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
     }
   ]
 }
