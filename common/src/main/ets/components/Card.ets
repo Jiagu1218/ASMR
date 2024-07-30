@@ -78,6 +78,7 @@ export struct Card{
           .width("100%")
           .height("100%")
           .fontSize("16fp")
+          .maxLines(2)
       }
       .width("100%")
       .height("32vp")

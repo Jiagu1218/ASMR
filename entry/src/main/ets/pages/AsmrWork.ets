@@ -56,11 +56,11 @@ struct AsmrWork {
    * */
   @State list: LazyDataSource<WorkInfo> = new LazyDataSource()
   aboutToAppear(): void {
-    HaNiMeSession.build().home().then(result =>{
-      LogUtil.info('HaNiMeSession home:'+JSON.stringify(result))
-    }).catch((e:BusinessError)=>{
-      LogUtil.error('HaNiMeSession home'+e.message)
-    })
+    // HaNiMeSession.build().home().then(result =>{
+    //   LogUtil.info('HaNiMeSession home:'+JSON.stringify(result))
+    // }).catch((e:BusinessError)=>{
+    //   LogUtil.error('HaNiMeSession home'+e.message)
+    // })
     // HaNiMeSession.build().playerPage('91015').then(result =>{
     //   LogUtil.info('playerPage:'+JSON.stringify(result))
     // }).catch((e:BusinessError)=>{

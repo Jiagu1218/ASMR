@@ -61,11 +61,7 @@ struct HaNiMePage {
   @State list: LazyDataSource<CardPanel> = new LazyDataSource()
 
   aboutToAppear(): void {
-    HaNiMeSession.build().home().then(result => {
-      LogUtil.info('HaNiMeSession home:' + JSON.stringify(result))
-    }).catch((e: BusinessError) => {
-      LogUtil.error('HaNiMeSession home' + e.message)
-    })
+
     this.oneListener.on('change', (mediaQueryResult: mediaquery.MediaQueryResult) => {
       this.oneLine(mediaQueryResult)
     })
@@ -76,12 +72,22 @@ struct HaNiMePage {
       this.threeLine(mediaQueryResult)
     })
     this.displayWidth = px2vp(display.getDefaultDisplaySync().width)
-    this.getHome()
+    this.getHentai()
   }
 
   getHome() {
-    WebResource.getHaNiMeHomeData().then((result: CardPanels) => {
+    HaNiMeSession.build().home().then(result => {
       this.list.push(...result)
+      LogUtil.info('HaNiMeSession home:' + JSON.stringify(result))
+    }).catch((e: BusinessError) => {
+      LogUtil.error('HaNiMeSession home' + e.message)
+    })
+  }
+
+  getHentai() {
+    HaNiMeSession.build().hentai({genre:'裏番',page:this.pageNum}).then((result: CardPanels) => {
+      this.list.push(...result)
+      this.pageNum++
     }).catch((error: BusinessError) => {
       LogUtil.info(error.message)
     })
@@ -122,8 +128,8 @@ struct HaNiMePage {
         .height('100%')
         .width('100%')
         .cachedCount(3)
-        .onReachEnd(() => {
-
+        .onReachEnd(()=>{
+          this.getHentai()
         })
       } else {
         List({ space: 24 }) {
@@ -140,6 +146,9 @@ struct HaNiMePage {
             }
           }, (item: CardPanel) => item.id)
         }.width('100%').height('100%')
+        .onReachEnd(()=>{
+          this.getHentai()
+        })
       }
       if (this.videoData) {
         Column(){

@@ -23,242 +23,242 @@ import { LengthMetrics } from '@ohos.arkui.node'
 export struct WorkCard{
 
   @Require @Prop work:WorkInfo
-  //   = {
-  //   "id": 1204312,
-  //   "title": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
-  //   "circle_id": 62300,
-  //   "name": "072LABOプッシー",
-  //   "nsfw": true,
-  //   "release": "2024-06-06",
-  //   "dl_count": 503,
-  //   "price": 176,
-  //   "review_count": 2,
-  //   "rate_count": 60,
-  //   "rate_average_2dp": 4.75,
-  //   "rate_count_detail": [
-  //     {
-  //       "review_point": 1,
-  //       "count": 0,
-  //       "ratio": 0
-  //     },
-  //     {
-  //       "review_point": 2,
-  //       "count": 0,
-  //       "ratio": 0
-  //     },
-  //     {
-  //       "review_point": 3,
-  //       "count": 5,
-  //       "ratio": 8
-  //     },
-  //     {
-  //       "review_point": 4,
-  //       "count": 5,
-  //       "ratio": 8
-  //     },
-  //     {
-  //       "review_point": 5,
-  //       "count": 50,
-  //       "ratio": 83
-  //     }
-  //   ],
-  //   "rank": [
-  //     {
-  //       "term": "day",
-  //       "category": "voice",
-  //       "rank": 24,
-  //       "rank_date": "2024-06-07"
-  //     }
-  //   ],
-  //   "has_subtitle": false,
-  //   "create_date": "2024-06-29",
-  //   "vas": [
-  //     {
-  //       "id": "6c6b5d46-4bf4-5785-bff0-86f989d265c8",
-  //       "name": "秋山はるる"
-  //     }
-  //   ],
-  //   "tags": [
-  //     {
-  //       "id": 68,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Dirty Talk",
-  //           "history": []
-  //         },
-  //         "ja-jp": {
-  //           "name": "淫語"
-  //         },
-  //         "zh-cn": {
-  //           "name": "淫语",
-  //           "history": []
-  //         }
-  //       },
-  //       "name": "淫语"
-  //     },
-  //     {
-  //       "id": 114,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Coercion / Compulsion",
-  //           "censored": "Ordered / Compelled"
-  //         },
-  //         "ja-jp": {
-  //           "name": "強制/無理矢理",
-  //           "censored": "命令/無理矢理"
-  //         },
-  //         "zh-cn": {
-  //           "name": "强制/硬上",
-  //           "censored": "强行"
-  //         }
-  //       },
-  //       "name": "强制/硬上"
-  //     },
-  //     {
-  //       "id": 128,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Internal Cumshot",
-  //           "history": []
-  //         },
-  //         "ja-jp": {
-  //           "name": "中出し"
-  //         },
-  //         "zh-cn": {
-  //           "name": "内射/中出",
-  //           "history": []
-  //         }
-  //       },
-  //       "name": "内射/中出"
-  //     },
-  //     {
-  //       "id": 142,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Naughty / Lewd",
-  //           "history": []
-  //         },
-  //         "ja-jp": {
-  //           "name": "淫乱"
-  //         },
-  //         "zh-cn": {
-  //           "name": "淫乱"
-  //         }
-  //       },
-  //       "name": "淫乱"
-  //     },
-  //     {
-  //       "id": 496,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Binaural"
-  //         },
-  //         "ja-jp": {
-  //           "name": "バイノーラル/ダミヘ"
-  //         },
-  //         "zh-cn": {
-  //           "name": "双声道立体声/人头麦",
-  //           "history": [
-  //             {
-  //               "name": "环绕音",
-  //               "deprecatedAt": 1712218463247
-  //             }
-  //           ]
-  //         }
-  //       },
-  //       "name": "环绕音"
-  //     },
-  //     {
-  //       "id": 500,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Ear Licking",
-  //           "history": []
-  //         },
-  //         "ja-jp": {
-  //           "name": "耳舐め"
-  //         },
-  //         "zh-cn": {
-  //           "name": "舔耳",
-  //           "history": []
-  //         }
-  //       },
-  //       "name": "舔耳"
-  //     },
-  //     {
-  //       "id": 514,
-  //       "i18n": {
-  //         "en-us": {
-  //           "name": "Guided Masturbation",
-  //           "history": []
-  //         },
-  //         "ja-jp": {
-  //           "name": "オナサポ"
-  //         },
-  //         "zh-cn": {
-  //           "name": "辅助自慰",
-  //           "history": [
-  //             {
-  //               "name": "自慰帮手",
-  //               "deprecatedAt": 1712218463248
-  //             }
-  //           ]
-  //         }
-  //       },
-  //       "name": "自慰帮手"
-  //     }
-  //   ],
-  //   "language_editions": [
-  //     {
-  //       "lang": "JPN",
-  //       "label": "日本語",
-  //       "workno": "RJ01204312",
-  //       "edition_id": 23984,
-  //       "edition_type": "language",
-  //       "display_order": 1
-  //     },
-  //     {
-  //       "lang": "CHI_HANS",
-  //       "label": "簡体中文",
-  //       "workno": "RJ01208365",
-  //       "edition_id": 23984,
-  //       "edition_type": "language",
-  //       "display_order": 5
-  //     }
-  //   ],
-  //   "original_workno": undefined,
-  //   "other_language_editions_in_db": [],
-  //   "translation_info": {
-  //     "lang": undefined,
-  //     "is_child": false,
-  //     "is_parent": false,
-  //     "is_original": true,
-  //     "is_volunteer": false,
-  //     "child_worknos": [],
-  //     "parent_workno": undefined,
-  //     "original_workno": undefined,
-  //     "is_translation_agree": true,
-  //     "translation_bonus_langs": [],
-  //     "is_translation_bonus_child": false,
-  //     "production_trade_price_rate": 80
-  //   },
-  //   "work_attributes": "RG62300,adl,male,SOU,JPN,SND,TRI,DLP,REV,142",
-  //   "age_category_string": "adult",
-  //   "duration": 1822,
-  //   "source_type": "DLSITE",
-  //   "source_id": "RJ01204312",
-  //   "source_url": "https://www.dlsite.com/maniax/work/=/product_id/RJ01204312.html",
-  //   "userRating": undefined,
-  //   "circle": {
-  //     "id": 62300,
-  //     "name": "072LABOプッシー",
-  //     "source_id": "RG62300",
-  //     "source_type": "DLSITE"
-  //   },
-  //   "samCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=sam",
-  //   "thumbnailCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=240x240",
-  //   "mainCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=main"
-  // }
+    = {
+    "id": 1204312,
+    "title": "【我慢イキ】まんこ屋本舗★まんチョイス#02「ふみか21歳のおまんこ」〜当店は女性のアクメは禁止のおまんこ貸し出しサービスです〜【アクメナビ搭載】",
+    "circle_id": 62300,
+    "name": "072LABOプッシー",
+    "nsfw": true,
+    "release": "2024-06-06",
+    "dl_count": 503,
+    "price": 176,
+    "review_count": 2,
+    "rate_count": 60,
+    "rate_average_2dp": 4.75,
+    "rate_count_detail": [
+      {
+        "review_point": 1,
+        "count": 0,
+        "ratio": 0
+      },
+      {
+        "review_point": 2,
+        "count": 0,
+        "ratio": 0
+      },
+      {
+        "review_point": 3,
+        "count": 5,
+        "ratio": 8
+      },
+      {
+        "review_point": 4,
+        "count": 5,
+        "ratio": 8
+      },
+      {
+        "review_point": 5,
+        "count": 50,
+        "ratio": 83
+      }
+    ],
+    "rank": [
+      {
+        "term": "day",
+        "category": "voice",
+        "rank": 24,
+        "rank_date": "2024-06-07"
+      }
+    ],
+    "has_subtitle": false,
+    "create_date": "2024-06-29",
+    "vas": [
+      {
+        "id": "6c6b5d46-4bf4-5785-bff0-86f989d265c8",
+        "name": "秋山はるる"
+      }
+    ],
+    "tags": [
+      {
+        "id": 68,
+        "i18n": {
+          "en-us": {
+            "name": "Dirty Talk",
+            "history": []
+          },
+          "ja-jp": {
+            "name": "淫語"
+          },
+          "zh-cn": {
+            "name": "淫语",
+            "history": []
+          }
+        },
+        "name": "淫语"
+      },
+      {
+        "id": 114,
+        "i18n": {
+          "en-us": {
+            "name": "Coercion / Compulsion",
+            "censored": "Ordered / Compelled"
+          },
+          "ja-jp": {
+            "name": "強制/無理矢理",
+            "censored": "命令/無理矢理"
+          },
+          "zh-cn": {
+            "name": "强制/硬上",
+            "censored": "强行"
+          }
+        },
+        "name": "强制/硬上"
+      },
+      {
+        "id": 128,
+        "i18n": {
+          "en-us": {
+            "name": "Internal Cumshot",
+            "history": []
+          },
+          "ja-jp": {
+            "name": "中出し"
+          },
+          "zh-cn": {
+            "name": "内射/中出",
+            "history": []
+          }
+        },
+        "name": "内射/中出"
+      },
+      {
+        "id": 142,
+        "i18n": {
+          "en-us": {
+            "name": "Naughty / Lewd",
+            "history": []
+          },
+          "ja-jp": {
+            "name": "淫乱"
+          },
+          "zh-cn": {
+            "name": "淫乱"
+          }
+        },
+        "name": "淫乱"
+      },
+      {
+        "id": 496,
+        "i18n": {
+          "en-us": {
+            "name": "Binaural"
+          },
+          "ja-jp": {
+            "name": "バイノーラル/ダミヘ"
+          },
+          "zh-cn": {
+            "name": "双声道立体声/人头麦",
+            "history": [
+              {
+                "name": "环绕音",
+                "deprecatedAt": 1712218463247
+              }
+            ]
+          }
+        },
+        "name": "环绕音"
+      },
+      {
+        "id": 500,
+        "i18n": {
+          "en-us": {
+            "name": "Ear Licking",
+            "history": []
+          },
+          "ja-jp": {
+            "name": "耳舐め"
+          },
+          "zh-cn": {
+            "name": "舔耳",
+            "history": []
+          }
+        },
+        "name": "舔耳"
+      },
+      {
+        "id": 514,
+        "i18n": {
+          "en-us": {
+            "name": "Guided Masturbation",
+            "history": []
+          },
+          "ja-jp": {
+            "name": "オナサポ"
+          },
+          "zh-cn": {
+            "name": "辅助自慰",
+            "history": [
+              {
+                "name": "自慰帮手",
+                "deprecatedAt": 1712218463248
+              }
+            ]
+          }
+        },
+        "name": "自慰帮手"
+      }
+    ],
+    "language_editions": [
+      {
+        "lang": "JPN",
+        "label": "日本語",
+        "workno": "RJ01204312",
+        "edition_id": 23984,
+        "edition_type": "language",
+        "display_order": 1
+      },
+      {
+        "lang": "CHI_HANS",
+        "label": "簡体中文",
+        "workno": "RJ01208365",
+        "edition_id": 23984,
+        "edition_type": "language",
+        "display_order": 5
+      }
+    ],
+    "original_workno": undefined,
+    "other_language_editions_in_db": [],
+    "translation_info": {
+      "lang": undefined,
+      "is_child": false,
+      "is_parent": false,
+      "is_original": true,
+      "is_volunteer": false,
+      "child_worknos": [],
+      "parent_workno": undefined,
+      "original_workno": undefined,
+      "is_translation_agree": true,
+      "translation_bonus_langs": [],
+      "is_translation_bonus_child": false,
+      "production_trade_price_rate": 80
+    },
+    "work_attributes": "RG62300,adl,male,SOU,JPN,SND,TRI,DLP,REV,142",
+    "age_category_string": "adult",
+    "duration": 1822,
+    "source_type": "DLSITE",
+    "source_id": "RJ01204312",
+    "source_url": "https://www.dlsite.com/maniax/work/=/product_id/RJ01204312.html",
+    "userRating": undefined,
+    "circle": {
+      "id": 62300,
+      "name": "072LABOプッシー",
+      "source_id": "RG62300",
+      "source_type": "DLSITE"
+    },
+    "samCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=sam",
+    "thumbnailCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=240x240",
+    "mainCoverUrl": "https://api.asmr-200.com/api/cover/1204312.jpg?type=main"
+  }
 
   build() {
     Column({space:8}){

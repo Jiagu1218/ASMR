@@ -264,4 +264,7 @@ export namespace WebResource {
   export async function getHaNiMeVideoData(id:string):Promise<VideoMediaData>{
     return HaNiMeSession.build().playerPage(id)
   }
+  export async function getHaNiMeHentaiData():Promise<CardPanels>{
+    return HaNiMeSession.build().hentai({genre:'裏番'})
+  }
 }

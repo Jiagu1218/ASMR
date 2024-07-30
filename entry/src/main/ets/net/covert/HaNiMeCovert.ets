@@ -113,7 +113,7 @@ export function analysisHentai(htmlStr:string):CardPanels {
   const titleDivs = DomUtils.getElements({['class']:'home-rows-videos-title'},dom,true)
   return titleDivs.map<CardPanel>(item =>{
     const title = DomUtils.textContent(item)?.replace(/\s*|\t|\r|\n/g, '')
-    const imgTag = item.prev
+    const imgTag = item.prev?.prev
     const imgSrc = DomUtils.getAttributeValue(imgTag as Element,'src')||''
     const aTag = item.parent?.parent
     const pageUrl = DomUtils.getAttributeValue(aTag as Element,'href')||''
