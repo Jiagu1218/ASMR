@@ -10,8 +10,8 @@ import { WorkTrackDialog } from '../component/WorkTrackDialog';
 import { media } from '@kit.MediaKit';
 import { startBackGroundTask } from '../util/BackGroundTaskUtil';
 import { common } from '@kit.AbilityKit';
-import { LogUtil, DayJsUtil, AppStorageConstants } from 'common';
-import { MediaService,MediaData } from 'MediaService'
+import { LogUtil, DayJsUtil, AppStorageConstants, MusicData } from 'common';
+import { MediaService } from 'MediaService'
 
 @Preview
 @Entry
@@ -37,7 +37,7 @@ struct Player {
   @StorageLink(AppStorageConstants.DURATION) duration:number = 0
   @StorageLink(AppStorageConstants.CURRENT_TIME) @Watch('onTimeUpdate') currentTime:number = 0
   @StorageLink(AppStorageConstants.WORK_TRACKS) workTracks:WorkTracks = []
-  @StorageLink(AppStorageConstants.PLAY_MEDIA_DATA) mediaData: MediaData = {
+  @StorageLink(AppStorageConstants.PLAY_MEDIA_DATA) mediaData: MusicData = {
     id: '0',
     title: '超塩対応彼氏持ちギャルをパパ呼び愛娘にする話',
     duration: 100,
@@ -76,7 +76,7 @@ struct Player {
         case 'audio':
           if(this.playerState == 'playing'){
             const title = this.workTrack.title
-            const mediaData:MediaData = {
+            const mediaData:MusicData = {
               id:this.mediaData.id,
               title:title.slice(0,title.lastIndexOf('.')),
               imageUrl:this.mediaData.imageUrl,

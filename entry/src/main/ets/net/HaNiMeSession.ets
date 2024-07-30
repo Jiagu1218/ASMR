@@ -96,6 +96,9 @@ export class HaNiMeSession{
     })
   }
 
+  /**
+   * 番剧
+   * */
   public hentai(param:HaNiMeQueryParam):Promise<CardPanels>{
     const params = this.buildParam(param)
     return this.session!.get('/search?'+params).then((rep: rcp.Response) => {
@@ -127,10 +130,21 @@ export class HaNiMeSession{
     if (param.month) {
       params.append('year',param.month)
     }
+    if (param.type) {
+      params.append('type',param.type)
+    }
+    if (param.tags && param.tags.length > 0) {
+      param.tags.forEach(tag => {
+        params.append('tags[]', tag)
+      });
+    }
     return params.toString()
   }
 }
 
+/**
+ * 查询参数
+ * */
 export interface HaNiMeQueryParam{
   /**
    * 类型
@@ -147,7 +161,7 @@ export interface HaNiMeQueryParam{
   /**
    * 排序
    * */
-  sort?:string
+  sort?:'最新上市'|'最新上傳'|'本日排行'|'本週排行'|'本月排行'|'觀看次數'|'他們在看'
   /**
    * 年份
    * */
@@ -156,4 +170,10 @@ export interface HaNiMeQueryParam{
    * 月份
    * */
   month?:string
+  /**
+   * 标签
+   * */
+  tags?:string[]
+
+  type?:'artist'
 }

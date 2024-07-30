@@ -3,10 +3,10 @@ import { avSession as AVSessionManager } from '@kit.AVSessionKit';
 import { AsyncCallback, BusinessError, ErrorCallback } from '@kit.BasicServicesKit';
 import { audio } from '@kit.AudioKit';
 
-import { MediaData } from '../entity/MediaData';
+
 import { AVSessionUtil } from '../utils/AVSessionUtil';
 import { common } from '@kit.AbilityKit';
-import { AppStorageConstants, LogUtil } from 'common';
+import { AppStorageConstants, LogUtil, MusicData } from 'common';
 
 
 export class MediaService {
@@ -16,8 +16,8 @@ export class MediaService {
   private avSession?:AVSessionManager.AVSession
   private playerMode: AppStorageConstants.PlayerMode = 'order'
   private playerState: media.AVPlayerState = 'idle'
-  private playerList: MediaData[] = []
-  private mediaData?:MediaData
+  private playerList: MusicData[] = []
+  private mediaData?:MusicData
   private playerIndex: number = 0
   private play?: AsyncCallback<void> = () => {
     this.avPlayer?.play()
@@ -120,18 +120,18 @@ export class MediaService {
     this.avPlayer?.off("error")
   }
 
-  addPlayData(...media:MediaData[]){
+  addPlayData(...media:MusicData[]){
     media.forEach(mediaData=>{
       if (this.mediaDataIndex(mediaData) == -1) {
         this.playerList.push(mediaData)
         if (this.avPlayer?.state != 'playing') {
-          AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,mediaData)
+          AppStorage.setOrCreate<MusicData>(AppStorageConstants.PLAY_MEDIA_DATA,mediaData)
         }
       }
     })
   }
 
-  removePlayData(media:MediaData){
+  removePlayData(media:MusicData){
   }
 
   clearPlayList(){
@@ -141,15 +141,15 @@ export class MediaService {
   /**
    * 媒体在列表中的位置
    * */
-  private mediaDataIndex(media:MediaData):number{
+  private mediaDataIndex(media:MusicData):number{
     return this.playerList.findIndex(mediaData=>media.id == mediaData.id && media.source == mediaData.source && media.mediaUrl == mediaData.mediaUrl)
   }
   
-  async playMedia(media?:MediaData){
+  async playMedia(media?:MusicData){
     if(media){
       if(!this.mediaData){
         this.mediaData = media
-        AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
+        AppStorage.setOrCreate<MusicData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
       }
       if(this.mediaDataIndex(media) == -1){
         this.playerList.push(media)
@@ -157,7 +157,7 @@ export class MediaService {
       if (this.avPlayer?.state == 'idle' && media.mediaUrl?.trim().length>0) {
         this.avPlayer.url = media.mediaUrl
         this.mediaData = media
-        AppStorage.setOrCreate<MediaData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
+        AppStorage.setOrCreate<MusicData>(AppStorageConstants.PLAY_MEDIA_DATA,media)
       }
     } else {
       if (this.avPlayer?.state == 'playing'){

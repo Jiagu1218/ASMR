@@ -5,7 +5,7 @@ import dataSourcePool from '../pool/DataSourcePool';
 import { startBackGroundTask, stopBackGroundTask } from '../util/BackGroundTaskUtil';
 import { HaNiMeSession } from '../net/HaNiMeSession';
 import { ComicSession } from '../net/ComicSession';
-import { MediaService,MediaData } from 'MediaService'
+import { MediaService } from 'MediaService'
 
 
 export default class EntryAbility extends UIAbility {

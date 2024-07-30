@@ -1,7 +1,7 @@
-/**
- * 媒体信息
- * */
-export interface MediaData {
+export interface MusicDetail{
+  music:MusicData
+}
+export interface MusicData{
   id: string
   /**
    * 标题

@@ -1,9 +1,9 @@
 import { avSession } from '@kit.AVSessionKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { MediaData } from '../entity/MediaData';
+
 import { media } from '@kit.MediaKit';
 import { common, wantAgent } from '@kit.AbilityKit';
-import { LogUtil } from 'common';
+import { LogUtil, MusicData } from 'common';
 
 export namespace AVSessionUtil {
   export async function createAVSession(context: common.UIAbilityContext):Promise<avSession.AVSession>{
@@ -31,7 +31,7 @@ export namespace AVSessionUtil {
     })
   }
 
-  export function coverToMetaData(mediaData:MediaData):avSession.AVMetadata{
+  export function coverToMetaData(mediaData:MusicData):avSession.AVMetadata{
     return {
       assetId: mediaData.id, // 由应用指定，用于标识应用媒体库里的媒体
       title: mediaData.title,
@@ -56,7 +56,7 @@ export namespace AVSessionUtil {
     }
   }
 
-  export async function setAVSessionInfo(session:avSession.AVSession,mediaData:MediaData,playState:media.AVPlayerState) {
+  export async function setAVSessionInfo(session:avSession.AVSession,mediaData:MusicData,playState:media.AVPlayerState) {
     // 设置必要的媒体信息
     setAVMataData(session,mediaData)
     // 简单设置一个播放状态
@@ -92,7 +92,7 @@ export namespace AVSessionUtil {
     });
   }
 
-  export async function setAVMataData(session:avSession.AVSession,mediaData:MediaData){
+  export async function setAVMataData(session:avSession.AVSession,mediaData:MusicData){
     // 设置必要的媒体信息
     let metadata: avSession.AVMetadata = coverToMetaData(mediaData)
     session.setAVMetadata(metadata).then(() => {
