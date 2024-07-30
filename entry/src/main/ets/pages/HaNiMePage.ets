@@ -18,8 +18,7 @@ struct HaNiMePage {
   @State waterFlowColumnsTemplate: string = '1fr '
   private videoController:VideoController = new VideoController()
   oneListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width < 520vp)')
-  twoListener: mediaquery.MediaQueryListener =
-    mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
+  twoListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 520vp) and (width < 840vp)')
   threeListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('screen and (width >= 840vp)')
 
   oneLine(mediaQueryResult: mediaquery.MediaQueryResult) {
@@ -72,7 +71,8 @@ struct HaNiMePage {
       this.threeLine(mediaQueryResult)
     })
     this.displayWidth = px2vp(display.getDefaultDisplaySync().width)
-    this.getHentai()
+    // this.getHentai()
+    this.getHome()
   }
 
   getHome() {

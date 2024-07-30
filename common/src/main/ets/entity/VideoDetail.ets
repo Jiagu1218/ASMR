@@ -40,10 +40,19 @@ export interface Comment{
 export interface VideoData{
   id: string
   title: string
-  url?: string
+  url?: VideoUrlData[]
   image?: string
   pageUrl?: string
   duration?: number
   durationStr?:string
   aspectRatio?: number
+}
+
+export interface VideoUrlData{
+  url:string
+  type?:string
+  /**
+   * 分辨率
+   * */
+  definition?:string
 }

@@ -18,4 +18,8 @@ export interface CardPanel{
   commentsStr?:string
   topLeftStr?:string
   topRightStr?:string
+  /**
+   * 图片比例
+   * */
+  aspectRatio?:number
 }

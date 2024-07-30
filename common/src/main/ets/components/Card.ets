@@ -71,7 +71,7 @@ export struct Card{
       .borderRadius($r('sys.float.ohos_id_card_border_radius'))
       .shadow({ radius: 4, color: "rgba(0, 0, 30,0.85)" })
       .width("100%")
-      .aspectRatio(16/9)
+      .aspectRatio(this.info.aspectRatio?this.info.aspectRatio:16/9)
       // .height(200)
       Row() {
         Text(this.info.title)

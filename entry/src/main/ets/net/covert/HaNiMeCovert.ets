@@ -31,7 +31,8 @@ export function analysisCardPanel(pageHtml: string): CardPanels {
       id:id,
       title:title,
       image:imageUrl,
-      pageUrl:pageUrl
+      pageUrl:pageUrl,
+      aspectRatio:9/16
     }
   })
   const cardPanel = DomUtils.getElements({['class']:'card-mobile-panel inner'},dom,true)
